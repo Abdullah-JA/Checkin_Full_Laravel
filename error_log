@@ -1,0 +1,1 @@
+[04-Feb-2025 07:05:35 America/Chicago] PHP Fatal error:  Out of memory (allocated 84856832 bytes) (tried to allocate 8388608 bytes) in /home3/ratco/checkin/samples/vendor/composer/autoload_classmap.php on line 32773
