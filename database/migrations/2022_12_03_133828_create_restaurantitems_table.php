@@ -15,7 +15,6 @@ class CreateRestaurantitemsTable extends Migration
     {
         Schema::create('restaurantitems', function (Blueprint $table) {
           $table->increments('id');
-          $table->integer('Hotel',false,true);
           $table->integer('facility_id',false,true);
           $table->foreign('facility_id')->references('id')->on('facilitys');
           $table->integer('restaurantmenue_id',false,true);

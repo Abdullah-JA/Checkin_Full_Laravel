@@ -15,7 +15,6 @@ class CreateRestaurantmenuesTable extends Migration
     {
         Schema::create('restaurantmenues', function (Blueprint $table) {
           $table->increments('id');
-          $table->integer('Hotel',false,true);
           $table->integer('FacilityId',false,true);
           $table->string('name',50);
           $table->string('arabicName',50);

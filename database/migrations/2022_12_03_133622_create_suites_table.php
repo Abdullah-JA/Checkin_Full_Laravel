@@ -18,7 +18,6 @@ class CreateSuitesTable extends Migration
           $table->integer('SuiteNumber',false,true);
           $table->string('Rooms');
           $table->string('RoomsId');
-          $table->integer('Hotel',false,true);
           $table->integer('Building',false,true);
           $table->integer('BuildingId',false,true);
           $table->integer('Floor',false,true);

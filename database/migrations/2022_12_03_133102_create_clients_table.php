@@ -14,15 +14,20 @@ class CreateClientsTable extends Migration
     public function up()
     {
         Schema::create('clients', function (Blueprint $table) {
-          $table->increments('id');
-          $table->integer('Hotel',false,true);
-          $table->string('FirstName',50);
-          $table->string('LastName',50);
-          $table->string('Mobile');
-          $table->string('Email')->nullable(true);
-          $table->enum('IdType',['ID','PASSPORT']);
-          $table->string('IdNumber',20);
-          $table->timestamps();
+            $table->increments('id');
+            $table->string('FirstName', 50);
+            $table->string('LastName', 50);
+            $table->string('Mobile');
+            $table->string('Email')->nullable(true);
+            $table->enum('IdType', ['ID', 'PASSPORT']);
+            $table->string('IdNumber', 20);
+            $table->tinyInteger('Gender')->comment('1 => Male, 2 => Female');
+            $table->date('Birthday');
+            $table->integer('GuestCategoryId')->unsigned()->comment('Gold, Silver, or ...');
+            $table->foreign('GuestCategoryId')->references('id')->on('guestcategory');
+            $table->string('Nationality', 50);
+            $table->tinyInteger('GuestType')->comment('1 => Citizen, 2 => Foreigner, 3 => Gulf Citizen, 4 => Visitor Id');
+            $table->timestamps();
         });
     }
 

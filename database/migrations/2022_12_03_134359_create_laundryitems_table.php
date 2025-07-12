@@ -15,7 +15,6 @@ class CreateLaundryitemsTable extends Migration
     {
         Schema::create('laundryitems', function (Blueprint $table) {
           $table->increments('id');
-          $table->integer('Hotel',false,true);
           $table->integer('Facility',false,true);
           $table->string('Name');
           $table->double('Price');

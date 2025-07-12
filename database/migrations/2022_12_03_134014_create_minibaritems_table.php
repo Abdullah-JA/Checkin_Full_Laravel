@@ -15,7 +15,6 @@ class CreateMinibaritemsTable extends Migration
     {
         Schema::create('minibaritems', function (Blueprint $table) {
           $table->increments('id');
-          $table->integer('Hotel',false,true);
           $table->integer('facility_id',false,true);
           $table->foreign('facility_id')->references('id')->on('Facilitys');
           $table->string('Name');

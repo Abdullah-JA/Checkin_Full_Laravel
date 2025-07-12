@@ -18,7 +18,6 @@ class CreateServiceordersTable extends Migration
           $table->integer('roomNumber',false,true);
           $table->integer('Reservation',false,true);
           $table->integer('RorS',false,true);
-          $table->integer('Hotel',false,true);
           $table->String('dep',30);
           $table->bigInteger('dateTime',false,true);
           $table->String('orderText');

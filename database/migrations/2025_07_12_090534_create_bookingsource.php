@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class Serverdevices extends Migration
+class CreateBookingsource extends Migration
 {
     /**
      * Run the migrations.
@@ -13,15 +13,12 @@ class Serverdevices extends Migration
      */
     public function up()
     {
-        //
-        Schema::create('serverdevices', function (Blueprint $table) {
+        Schema::create('bookingsource', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('name',50);
-            $table->string('roomsIds');
-            $table->tinyInteger('status');
-            $table->string('token');
+            $table->string('NameAr', 255);
+            $table->string('NameEn', 255);
             $table->timestamps();
-          });
+        });
     }
 
     /**
@@ -31,7 +28,6 @@ class Serverdevices extends Migration
      */
     public function down()
     {
-        //
-        Schema::dropIfExists('serverdevices');
+        Schema::dropIfExists('bookingsource');
     }
 }

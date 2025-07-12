@@ -15,7 +15,6 @@ class CreateRestaurantordersTable extends Migration
     {
         Schema::create('restaurantorders', function (Blueprint $table) {
           $table->increments('id');
-          $table->integer('Hotel',false,true);
           $table->integer('Facility',false,true);
           $table->integer('Reservation',false,true);
           $table->integer('room',false,true);

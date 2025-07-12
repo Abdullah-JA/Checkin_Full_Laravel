@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class Serverdevices extends Migration
+class CreateElevators extends Migration
 {
     /**
      * Run the migrations.
@@ -13,15 +13,12 @@ class Serverdevices extends Migration
      */
     public function up()
     {
-        //
-        Schema::create('serverdevices', function (Blueprint $table) {
+        Schema::create('elevators', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('name',50);
-            $table->string('roomsIds');
-            $table->tinyInteger('status');
-            $table->string('token');
-            $table->timestamps();
-          });
+            $table->integer('number');
+            $table->string('buildingName', 40);
+            $table->integer('buildingNumber');
+        });
     }
 
     /**
@@ -31,7 +28,6 @@ class Serverdevices extends Migration
      */
     public function down()
     {
-        //
-        Schema::dropIfExists('serverdevices');
+        Schema::dropIfExists('elevators');
     }
 }
