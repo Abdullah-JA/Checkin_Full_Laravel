@@ -3,7 +3,6 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use phpseclib3\Math\BinaryField\Integer;
 
 class CreateBookingsTable extends Migration
 {
@@ -16,6 +15,8 @@ class CreateBookingsTable extends Migration
     {
         Schema::create('bookings', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('RoomId');
+            $table->foreign('RoomId')->references('id')->on('rooms');
             $table->integer('RoomNumber', false, true);
             $table->integer('ClientId', false, true);
             $table->integer('Status', false, true);
@@ -52,6 +53,8 @@ class CreateBookingsTable extends Migration
             $table->double('Taxes');
             $table->double('Total');
             $table->longText('FacilityIds');
+            $table->tinyInteger('Logedin')->comment("0=> Guest is Logged In 1=>Guest is Not Logged In");
+            $table->date('LogedinDate');
             $table->timestamps();
         });
     }
