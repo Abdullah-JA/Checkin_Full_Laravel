@@ -11,23 +11,23 @@ class CreateReceipts extends Migration
      *
      * @return void
      */
-public function up()
-{
-    Schema::create('receipts', function (Blueprint $table) {
-        $table->increments('id');
-        $table->string('ReceiptNumber', 50);
-        $table->date('ReceiptDate');
-        $table->double('Amount');
-        $table->integer('EmployeeId')->unsigned();
-        $table->foreign('EmployeeId')->references('id')->on('serviceemployees');
-        $table->string('Description', 255)->nullable();
-        $table->integer('ClientId')->unsigned()->nullable();
-        $table->foreign('ClientId')->references('id')->on('clients');
-        $table->integer('BookingId')->unsigned()->nullable();
-        $table->foreign('BookingId')->references('id')->on('bookings');
-        $table->timestamps();
-    });
-}
+    public function up()
+    {
+        Schema::create('receipts', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('ReceiptNumber', 50);
+            $table->date('ReceiptDate');
+            $table->double('Amount');
+            $table->integer('EmployeeId')->unsigned();
+            $table->foreign('EmployeeId')->references('id')->on('serviceemployees');
+            $table->string('Description', 255)->nullable();
+            $table->integer('ClientId')->unsigned()->nullable();
+            $table->foreign('ClientId')->references('id')->on('clients');
+            $table->integer('BookingId')->unsigned()->nullable();
+            $table->foreign('BookingId')->references('id')->on('bookings');
+            $table->timestamps();
+        });
+    }
 
 
     /**

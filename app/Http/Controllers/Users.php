@@ -9,6 +9,10 @@ use App\Models\Projectsvariable;
 use App\Models\Room;
 use Illuminate\Support\Facades\Http;
 use Exception;
+use App\Models\GuestCategory;
+use App\Models\OtherFeatures;
+use App\Models\StayRason;
+use App\Models\BookingSources;
 class Users extends Controller
 {
     //
@@ -240,7 +244,6 @@ class Users extends Controller
         }
     }
 
-
     // add
     public function modifyUserControl(Request $request)
     {
@@ -453,5 +456,255 @@ class Users extends Controller
             }
             return $rooms;
         }
+    }
+
+    public function addGuestCategory(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'NameCategoryAr' => 'required|string|max:50',
+            'NameCategoryEn' => 'required|string|max:50',
+            'DiscountType' => 'required|in:1,2,3',
+            'DiscountValue' => 'nullable|numeric',
+            'OtherFeaturesIds' => 'nullable|string',
+            'FacilityIds' => 'nullable|string',
+        ]);
+        if ($validator->fails()) {
+            return ['result' => 'failed', 'category' => '', 'error' => $validator->errors()];
+        }
+        $category = GuestCategory::create([
+            'NameCategoryAr' => $request->NameCategoryAr,
+            'NameCategoryEn' => $request->NameCategoryEn,
+            'DiscountType' => $request->DiscountType,
+            'DiscountValue' => $request->DiscountValue ?? 0,
+            'OtherFeaturesIds' => $request->OtherFeaturesIds,
+            'FacilityIds' => $request->FacilityIds,
+        ]);
+        return ['result' => 'success', 'category' => $category, 'error' => ''];
+    }
+
+    public function updateGuestCategory(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|numeric|exists:guestcategorys,id',
+            'NameCategoryAr' => 'nullable|string|max:50',
+            'NameCategoryEn' => 'nullable|string|max:50',
+            'DiscountType' => 'nullable|in:1,2,3',
+            'DiscountValue' => 'nullable|numeric',
+            'OtherFeaturesIds' => 'nullable|string',
+            'FacilityIds' => 'nullable|string',
+        ]);
+        if ($validator->fails()) {
+            return ['result' => 'failed', 'category' => '', 'error' => $validator->errors()];
+        }
+        $category = GuestCategory::find($request->id);
+        $category->update($request->only([
+            'NameCategoryAr',
+            'NameCategoryEn',
+            'DiscountType',
+            'DiscountValue',
+            'OtherFeaturesIds',
+            'FacilityIds',
+        ]));
+        return ['result' => 'success', 'error' => ''];
+    }
+
+    public function deleteGuestCategory(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|numeric|exists:guestcategorys,id',
+        ]);
+        if ($validator->fails()) {
+            return ['result' => 'failed', 'category' => '', 'error' => $validator->errors()];
+        }
+
+        try {
+            GuestCategory::find($request->id)->delete();
+            return ['result' => 'success', 'error' => ''];
+        } catch (Exception $e) {
+            return ['result' => 'failed', 'error' => $e->getMessage()];
+        }
+    }
+
+    public function getGuestCategory()
+    {
+        return GuestCategory::all();
+
+    }
+
+    public function addOtherFeature(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'NameAr' => 'required|string|max:255',
+            'NameEn' => 'required|string|max:255',
+        ]);
+        if ($validator->fails()) {
+            return ['result' => 'failed', 'feature' => '', 'error' => $validator->errors()];
+        }
+
+        $feature = OtherFeatures::create([
+            'NameAr' => $request->NameAr,
+            'NameEn' => $request->NameEn,
+        ]);
+
+        return ['result' => 'success', 'feature' => $feature, 'error' => ''];
+    }
+
+    public function updateOtherFeature(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|numeric|exists:otherfeatures,id',
+            'NameAr' => 'nullable|string|max:255',
+            'NameEn' => 'nullable|string|max:255',
+        ]);
+        if ($validator->fails()) {
+            return ['result' => 'failed', 'feature' => '', 'error' => $validator->errors()];
+        }
+
+        $feature = OtherFeatures::find($request->id);
+        $feature->update($request->only(['NameAr', 'NameEn']));
+
+        return ['result' => 'success', 'error' => ''];
+    }
+
+    public function deleteOtherFeature(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|numeric|exists:otherfeatures,id',
+        ]);
+        if ($validator->fails()) {
+            return ['result' => 'failed', 'feature' => '', 'error' => $validator->errors()];
+        }
+
+        try {
+            OtherFeatures::find($request->id)->delete();
+            return ['result' => 'success', 'error' => ''];
+        } catch (Exception $e) {
+            return ['result' => 'failed', 'error' => $e->getMessage()];
+        }
+    }
+
+    public function getOtherFeatures()
+    {
+        return OtherFeatures::all();
+    }
+
+    public function addStayReason(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'NameAr' => 'required|string|max:255',
+            'NameEn' => 'required|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return ['result' => 'failed', 'reason' => '', 'error' => $validator->errors()];
+        }
+
+        $reason = StayRason::create([
+            'NameAr' => $request->NameAr,
+            'NameEn' => $request->NameEn,
+        ]);
+
+        return ['result' => 'success', 'reason' => $reason, 'error' => ''];
+    }
+
+    public function updateStayReason(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|numeric|exists:stayreasons,id',
+            'NameAr' => 'nullable|string|max:255',
+            'NameEn' => 'nullable|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return ['result' => 'failed', 'reason' => '', 'error' => $validator->errors()];
+        }
+
+        $reason = StayRason::find($request->id);
+        $reason->update($request->only(['NameAr', 'NameEn']));
+
+        return ['result' => 'success', 'error' => ''];
+    }
+
+    public function deleteStayReason(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|numeric|exists:stayreasons,id',
+        ]);
+
+        if ($validator->fails()) {
+            return ['result' => 'failed', 'reason' => '', 'error' => $validator->errors()];
+        }
+
+        try {
+            StayRason::find($request->id)->delete();
+            return ['result' => 'success', 'error' => ''];
+        } catch (Exception $e) {
+            return ['result' => 'failed', 'error' => $e->getMessage()];
+        }
+    }
+
+    public function getStayReasons()
+    {
+        return StayRason::all();
+    }
+
+    public function addBookingSource(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'NameAr' => 'required|string|max:255',
+            'NameEn' => 'required|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return ['result' => 'failed', 'source' => '', 'error' => $validator->errors()];
+        }
+
+        $source = BookingSources::create([
+            'NameAr' => $request->NameAr,
+            'NameEn' => $request->NameEn,
+        ]);
+
+        return ['result' => 'success', 'source' => $source, 'error' => ''];
+    }
+
+    public function updateBookingSource(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|numeric|exists:bookingsources,id',
+            'NameAr' => 'nullable|string|max:255',
+            'NameEn' => 'nullable|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return ['result' => 'failed', 'source' => '', 'error' => $validator->errors()];
+        }
+
+        $source = BookingSources::find($request->id);
+        $source->update($request->only(['NameAr', 'NameEn']));
+
+        return ['result' => 'success', 'error' => ''];
+    }
+
+    public function deleteBookingSource(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|numeric|exists:bookingsources,id',
+        ]);
+
+        if ($validator->fails()) {
+            return ['result' => 'failed', 'source' => '', 'error' => $validator->errors()];
+        }
+
+        try {
+            BookingSources::find($request->id)->delete();
+            return ['result' => 'success', 'error' => ''];
+        } catch (Exception $e) {
+            return ['result' => 'failed', 'error' => $e->getMessage()];
+        }
+    }
+
+    public function getBookingSources()
+    {
+        return BookingSources::all();
     }
 }

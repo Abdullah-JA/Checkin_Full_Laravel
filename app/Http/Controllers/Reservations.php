@@ -21,6 +21,7 @@ use Google\Client as GoogleClient;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Exception;
+use Carbon\Carbon;
 
 class Reservations extends Controller
 {
@@ -524,6 +525,14 @@ class Reservations extends Controller
         if ($validation->fails()) {
             return response(['result' => 'failed', 'code' => 0, 'error' => $validation->errors()], 200);
         }
+        $current = Carbon::now()->toDateString();
+        if ($request->start_date < $current) {
+            return ['result' => 'failed', 'code' => 0, "AvailableRooms" => [], "error" => "The start date cannot be on a day before the current day."];
+        }
+        if ($request->expire_date > $request->start_date) {
+            return ['result' => 'failed', 'code' => 0, "AvailableRooms" => [], "error" => "The end date cannot be greater than the start date."];
+        }
+
         $availableRooms = array();
         $roomsQuery = Room::where('building_id', '=', $request->building_id);
         if ($request->filled('floor_id')) {
@@ -533,12 +542,14 @@ class Reservations extends Controller
             $roomsQuery->where('RoomTypeId', '=', $request->room_type);
         }
         //roomStatus=4 => Room is not Available
-        $rooms = $roomsQuery->where('roomStatus', '!=', 4)->get();
+        $rooms = $roomsQuery->get();
+        // $rooms = $roomsQuery->where('roomStatus', '!=', 4)->get();
         if (count($rooms) > 0) {
             foreach ($rooms as $room) {
                 $checkReservationForRoom = Booking::where('RoomId', '=', $room->id)
                     //تجاهل الحجوزات القديمة يلي خلصت قبل تاريخ البداية
-                    ->where('EndDate', '>=', $request->start_date)
+                    ->where('EndDate', '>', $request->start_date)
+                    ->where('StartDate', '<', $request->expire_date)
                     ->where(function ($query) use ($request) {
                         //بداية الحجز القديم داخلة ضمن المدة يلي طلبتها
                         $query->whereBetween('StartDate', [$request->start_date, $request->expire_date])
@@ -559,8 +570,8 @@ class Reservations extends Controller
                         break;
                     case 2: // جميع الغرف الفارغة
                         if (!$checkReservationForRoom) {
-                            $roomInfo = $room->toArray();
-                            // $roomInfo = $room->RoomNumber;
+                            // $roomInfo = $room->toArray();
+                            $roomInfo = $room->RoomNumber;
                             array_push($availableRooms, $roomInfo);
                         }
                         break;
@@ -579,10 +590,11 @@ class Reservations extends Controller
     public function checkReservationByRoom($roomId, $startDate, $expireDate)
     {
         $check = false;
-        $room = Room::where('id', $roomId)->where('roomStatus', '!=', 4)->first();
+        $room = Room::where('id', $roomId)->first();
         if ($room) {
             $check = Booking::where('RoomId', $room->id)
-                ->where('EndDate', '>=', $startDate)
+                ->where('EndDate', '>', $startDate)
+                ->where('StartDate', '<', $expireDate)
                 ->where(function ($query) use ($startDate, $expireDate) {
                     $query->whereBetween('StartDate', [$startDate, $expireDate])
                         ->orWhereBetween('EndDate', [$startDate, $expireDate])

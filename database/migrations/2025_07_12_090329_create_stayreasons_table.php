@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateBookingsource extends Migration
+class CreateStayreasonsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateBookingsource extends Migration
      */
     public function up()
     {
-        Schema::create('bookingsource', function (Blueprint $table) {
+        Schema::create('stayreasons', function (Blueprint $table) {
             $table->increments('id');
             $table->string('NameAr', 255);
             $table->string('NameEn', 255);
@@ -28,6 +28,6 @@ class CreateBookingsource extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('bookingsource');
+        Schema::dropIfExists('stayreasons');
     }
 }
