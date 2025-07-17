@@ -22,6 +22,7 @@ use Google\Client as GoogleClient;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Exception;
+use Carbon\Carbon;
 
 class Reservations extends Controller
 {
@@ -119,6 +120,7 @@ class Reservations extends Controller
     }
 
         // reserve room
+
     public function addRoomReservation(Request $request)
     {
         $validator = Validator::make($request->all(), [

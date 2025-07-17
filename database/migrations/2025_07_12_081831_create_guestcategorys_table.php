@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateGuestcategoryTable extends Migration
+class CreateGuestcategorysTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,10 @@ class CreateGuestcategoryTable extends Migration
      */
     public function up()
     {
-        Schema::create('guestcategory', function (Blueprint $table) {
+        Schema::create('guestcategorys', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('NameCategory', 50);
+            $table->string('NameCategoryAr', 50);
+            $table->string('NameCategoryEn', 50);
             $table->tinyInteger('DiscountType')->comment('1=>ConstantValue 2=>DiscountRates 3=>Other');
             $table->double('DiscountValue')->default(0);
             $table->longText('OtherFeaturesIds');
@@ -31,6 +32,6 @@ class CreateGuestcategoryTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('guestcategory');
+        Schema::dropIfExists('guestcategorys');
     }
 }
