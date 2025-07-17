@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\DateTimeManager;
 use Illuminate\Http\Request;
 use App\Models\Client;
 use App\Models\Suite;
@@ -46,6 +47,7 @@ class Reservations extends Controller
     /*
         add functions
     */
+        //add new client
     public static function addClient(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -81,520 +83,42 @@ class Reservations extends Controller
         }
         return $result;
     }
-
-
-
-    //   $validator = Validator::make($request->all(),[
-    //     'room_number' => 'required|numeric',
-    //     'first_name' => 'required|max:50|min:2',
-    //     'last_name' => 'required|max:50|min:2',
-    //     'mobile' => 'required|max:50|min:10',
-    //     'email' => 'max:50|nullable',
-    //     'id_type' => 'required|in:ID,PASSPORT',
-    //     'id_number' => 'required|max:20',
-    //     'start_date' => 'required',
-    //     'nights' => 'required|numeric',
-    //     'end_date' => 'required',
-    //     'building_number' => 'required',
-    //     'floor_number' => 'required|numeric',
-    //     'room_or_suite' => 'required|numeric',
-    //     'suite_id' => 'numeric',
-    //     'suite_number' => 'numeric',
-    //     'multi_rooms' => 'required|numeric',
-    //     'add_rooms_number' => 'required',
-    //     'add_rooms_id' => 'required',
-    //     'client_id' => 'required',
-    //     'my_token' => 'required'
-    //   ]);
-    //   if ($validator->fails())  {
-    //     $result = ['result'=>'failed','reservation'=>null,'error'=>$validator->errors()];
-    //     return $result ;
-    //   }
-    //   if (Users::checkAuth($request->input('my_token')) == false) {
-    //     return ['result'=>'failed','reservation'=>'','error'=>'you are unauthorized user'];
-    //   }
-    //   $roomNumber = $request->input('room_number');
-    //   $firstName = $request->input('first_name');
-    //   $lastName = $request->input('last_name');
-    //   $mobile = $request->input('mobile');
-    //   $idType = $request->input('id_type');
-    //   $idNumber = $request->input('id_number');
-    //   $start = $request->input('start_date');
-    //   $nights = $request->input('nights');
-    //   $end = $request->input('end_date');
-    //   $buildingNumber = $request->input('building_number');
-    //   $floorNumber = $request->input('floor_number');
-    //   $roomOrSuite = $request->input('room_or_suite');
-    //   $suiteId = 0;
-    //   $suiteNumber = 0;
-    //   $multiRooms = $request->input('multi_rooms');
-    //   $addRoomsNumber = $request->input('add_rooms_number');
-    //   $addRoomsIds = $request->input('add_rooms_id');
-    //   $clientId = $request->input('client_id');
-    //   $email = '';
-    //   if ($request->input('email') != null ) {
-    //     $email = $request->input('email');
-    //   }
-    //   if ($request->input('suite_id') != null ) {
-    //     $suiteId = $request->input('suite_id');
-    //   }
-    //   if ($request->input('suite_number') != null ) {
-    //     $suiteNumber = $request->input('suite_number');
-    //   }
-    //   DB::beginTransaction();
-    //   try {
-    //     if ($roomOrSuite == 1) {
-    //       // reservation is for room
-    //       if ($multiRooms > 0) {
-    //         // reservation is for room + additional room/s
-    //         $room = Room::where('RoomNumber','=',$roomNumber)->first();
-    //         if ($room != null) {
-    //           if ($room->roomStatus == 1) {
-    //             $ids = explode('-',$addRoomsIds);
-    //             $rooms = array();
-    //             for ($i=0;$i<count($ids);$i++) {
-    //               $rooms[$i] = Room::find($ids[$i]);
-    //             }
-    //             $st = true ;
-    //             for ($i=0;$i<count($rooms);$i++) {
-    //               if ($rooms[$i]->roomStatus > 1) {
-    //                 $st = false ;
-    //                 break ;
-    //               }
-    //             }
-    //             if ($st) {
-    //               $reserveRes = $this->insertReservation([
-    //                 'RoomNumber' => $roomNumber,
-    //                 'ClientId' => $clientId,
-    //                 'Status' => 1,
-    //                 'RoomOrSuite' => $roomOrSuite,
-    //                 'MultiRooms' => $multiRooms,
-    //                 'AddRoomNumber' => $addRoomsNumber,
-    //                 'AddRoomId' => $addRoomsIds,
-    //                 'StartDate' => $start,
-    //                 'Nights' => $nights,
-    //                 'EndDate' => $end,
-    //                 'Hotel' => 1,
-    //                 'BuildingNo' =>$buildingNumber,
-    //                 'Floor' => $floorNumber,
-    //                 'ClientFirstName' => $firstName,
-    //                 'ClientLastName' => $lastName,
-    //                 'IdType' => $idType,
-    //                 'IdNumber' => $idNumber,
-    //                 'MobileNumber' => $mobile,
-    //                 'Email' => $email,
-    //                 'Rating' => 0
-    //               ]);
-    //               if ($reserveRes['res'] == 'success') {
-    //                 $reservation = $reserveRes['reservation'];
-    //                 $roomRes = $this->reserveRoomInDB($room,$reservation->id);
-    //                 if ($roomRes['res'] == 'success') {
-    //                   $room = $roomRes['room'];
-    //                   if($this->reserveRoomInFirebase($room,$reservation)) {
-    //                     $this->sendMessageToRoom($room,$reservation,'message');
-    //                     $this->checkinRoom($room,$reservation);
-    //                     for ($i=0;$i<count($rooms);$i++) {
-    //                       $roomResult = $this->reserveRoomInDB($rooms[$i],$reservation->id);
-    //                       if ($roomResult['res'] == 'success') {
-    //                         $this->reserveRoomInFirebase($rooms[$i],$reservation);
-    //                         $this->sendMessageToRoom($rooms[$i],$reservation,'message');
-    //                         $this->checkinRoom($rooms[$i],$reservation);
-    //                       }
-
-    //                     }
-    //                     $result = ['result'=>'success','reservation'=>$reservation,'error'=>null];
-    //                     DB::commit();
-    //                   }
-    //                   else {
-    //                     $result = ['result'=>'failed','reservation'=>null,'error'=>'unable to reserve room in firebase '];
-    //                     DB::rollBack();
-    //                   }
-    //                 }
-    //                 else {
-    //                   $error = $roomRes['error'];
-    //                   $result = ['result'=>'failed','reservation'=>null,'error'=>'unable to reserve room '.$error];
-    //                   DB::rollBack();
-    //                 }
-    //               }
-    //               else {
-    //                 $error = $reserveRes['error'];
-    //                 $result = ['result'=>'failed','reservation'=>null,'error'=>'unable to insert reservation '.$error];
-    //                 DB::rollBack();
-    //               }
-    //             }
-    //             else {
-    //               $result = ['result'=>'failed','reservation'=>null,'error'=>'one of the additional rooms is already reserved or unready or out of service'];
-    //             }
-    //           }
-    //           else if ($room->roomStatus == 2) {
-    //             $result = ['result'=>'failed','reservation'=>null,'error'=>'room '.$roomNumber.' is already reserved'];
-    //           }
-    //           else if ($room->roomStatus == 3) {
-    //             $result = ['result'=>'failed','reservation'=>null,'error'=>'room '.$roomNumber.' is unready'];
-    //           }
-    //           else if ($room->roomStatus == 4) {
-    //             $result = ['result'=>'failed','reservation'=>null,'error'=>'room '.$roomNumber.' is out of service'];
-    //           }
-    //         }
-    //         else {
-    //           $result = ['result'=>'failed','reservation'=>null,'error'=>'room '.$roomNumber.' is unexists'];
-    //         }
-    //       }
-    //       else {
-    //         // reservation is for single room
-    //         $room = Room::where('RoomNumber','=',$roomNumber)->first();
-    //         if ($room != null) {
-    //           if ($room->roomStatus == 1) {
-    //               $insertResult = $this->insertReservation([
-    //                 'RoomNumber' => $roomNumber,
-    //                     'ClientId' => $clientId,
-    //                     'Status' => 1,
-    //                     'RoomOrSuite' => $roomOrSuite,
-    //                     'MultiRooms' => $multiRooms,
-    //                     'AddRoomNumber' => $addRoomsNumber,
-    //                     'AddRoomId' => $addRoomsIds,
-    //                     'StartDate' => $start,
-    //                     'Nights' => $nights,
-    //                     'EndDate' => $end,
-    //                     'Hotel' => 1,
-    //                     'BuildingNo' =>$buildingNumber,
-    //                     'Floor' => $floorNumber,
-    //                     'ClientFirstName' => $firstName,
-    //                     'ClientLastName' => $lastName,
-    //                     'IdType' => $idType,
-    //                     'IdNumber' => $idNumber,
-    //                     'MobileNumber' => $mobile,
-    //                     'Email' => $email,
-    //                     'Rating' => 0
-    //               ]);
-    //               if ($insertResult['res'] == 'success') {
-    //                 $reservation = $insertResult['reservation'];
-    //                 $roomRes = $this->reserveRoomInDB($room,$reservation->id);
-    //                 if ($roomRes['res'] == 'success') {
-    //                   if($this->reserveRoomInFirebase($room,$reservation)) {
-    //                     $result = ['result'=>'success','reservation'=>$reservation,'error'=>null];
-    //                     DB::commit();
-    //                     $this->sendMessageToRoom($room,$reservation,'message');
-    //                     $this->checkinRoom($room,$reservation);
-    //                   }
-    //                   else {
-    //                     DB::rollback();
-    //                     $result = ['result'=>'failed','reservation'=>null,'error'=>'error reserving room in firebase'];
-    //                   }
-    //                 }
-    //                 else {
-    //                   $error = $roomRes['error'];
-    //                   DB::rollback();
-    //                   $result = ['result'=>'failed','reservation'=>null,'error'=>'error reserve room in database '.$error];
-    //                 }
-    //               }
-    //               else {
-    //                 $error = $insertResult['error'];
-    //                 DB::rollback();
-    //                 $result = ['result'=>'failed','reservation'=>null,'error'=>'error saving reservation '.$error];
-    //               }
-
-    //           }
-    //           else if ($room->roomStatus == 2) {
-    //             $result = ['result'=>'failed','reservation'=>null,'error'=>'room '.$roomNumber.' is already reserved'];
-    //           }
-    //           else if ($room->roomStatus == 3) {
-    //             $result = ['result'=>'failed','reservation'=>null,'error'=>'room '.$roomNumber.' is unready'];
-    //           }
-    //           else if ($room->roomStatus == 4) {
-    //             $result = ['result'=>'failed','reservation'=>null,'error'=>'room '.$roomNumber.' is out of service'];
-    //           }
-    //         }
-    //         else {
-    //           $result = ['result'=>'failed','reservation'=>null,'error'=>'room '.$roomNumber.' is unexists'];
-    //         }
-    //       }
-    //     }
-    //     else if ($roomOrSuite == 2) {
-    //       // reservation is for suite
-    //       if ($multiRooms > 0) {
-    //         // reservation is for one suite + additional room/s
-    //         $suiteRooms = Room::where('SuiteId','=',$suiteId)->get();
-    //         $st = true ;
-    //         if ($suiteRooms != null ) {
-    //           for ($i=0;$i<count($suiteRooms);$i++) {
-    //             if ($suiteRooms[$i]->roomStatus > 1) {
-    //               $st = false ;
-    //               break ;
-    //             }
-    //           }
-    //           if ($st) {
-    //             $suite = Suite::find($suiteId);
-    //             if ($suite != null) {
-    //               $ids = explode('-',$addRoomsIds);
-    //               $additionalRooms = array();
-    //               for ($i=0;$i<count($ids);$i++) {
-    //                 $additionalRooms[$i] = Room::find($ids[$i]);
-    //               }
-    //               $stt = true ;
-    //               for ($i=0;$i<count($additionalRooms);$i++) {
-    //                 if ($additionalRooms[$i]->roomStatus > 1) {
-    //                   $stt = false ;
-    //                   break ;
-    //                 }
-    //               }
-    //               if ($stt) {
-    //                 $reserveRes = $this->insertReservation([
-    //                   'RoomNumber' => $suite->SuiteNumber,
-    //                     'ClientId' => $clientId,
-    //                     'Status' => 1,
-    //                     'RoomOrSuite' => $roomOrSuite,
-    //                     'MultiRooms' => $multiRooms,
-    //                     'AddRoomNumber' => $addRoomsNumber,
-    //                     'AddRoomId' => $addRoomsIds,
-    //                     'StartDate' => $start,
-    //                     'Nights' => $nights,
-    //                     'EndDate' => $end,
-    //                     'Hotel' => 1,
-    //                     'BuildingNo' =>$buildingNumber,
-    //                     'Floor' => $floorNumber,
-    //                     'ClientFirstName' => $firstName,
-    //                     'ClientLastName' => $lastName,
-    //                     'IdType' => $idType,
-    //                     'IdNumber' => $idNumber,
-    //                     'MobileNumber' => $mobile,
-    //                     'Email' => $email,
-    //                     'Rating' => 0
-    //                 ]);
-    //                 if ($reserveRes['res'] == 'success') {
-    //                   $reservation = $reserveRes['reservation'];
-    //                   $suiteRes = $this->reserveSuiteInDB($suite);
-    //                   if ($suiteRes['res'] == 'success') {
-    //                     if ($this->reserveSuiteInFirebase($suite)) {
-    //                       for ($i=0;$i<count($suiteRooms);$i++) {
-    //                         $rrRes = $this->reserveSuiteRoomInDB($suiteRooms[$i],$reservation->id);
-    //                         if ($rrRes['res'] == 'success') {
-    //                           $this->reserveRoomInFirebase($suiteRooms[$i],$reservation);
-    //                           $this->sendMessageToRoom($suiteRooms[$i],$reservation,'message');
-    //                           $this->checkinRoom($suiteRooms[$i],$reservation);
-    //                         }
-    //                       }
-    //                       for ($i=0;$i<count($additionalRooms);$i++) {
-    //                         $rrRes = $this->reserveRoomInDB($additionalRooms[$i],$reservation->id);
-    //                         if ($rrRes['res'] == 'success') {
-    //                           $this->reserveRoomInFirebase($additionalRooms[$i],$reservation);
-    //                           $this->sendMessageToRoom($additionalRooms[$i],$reservation,'message');
-    //                           $this->checkinRoom($additionalRooms[$i],$reservation);
-    //                         }
-    //                       }
-    //                       $result = ['result'=>'success','reservation'=>$reservation,'error'=>null];
-    //                       DB::commit();
-    //                     }
-    //                   }
-    //                 }
-
-    //               }
-    //               else {
-    //                 $result = ['result'=>'failed','reservation'=>null,'error'=>'one of the additional rooms is already reserved or unready or out of service'];
-    //               }
-    //             }
-    //             else {
-    //               $result = ['result'=>'failed','reservation'=>null,'error'=>'suite id '.$suiteId.' is unexists'];
-    //             }
-    //           }
-    //           else {
-    //             $result = ['result'=>'failed','reservation'=>null,'error'=>'one of the suite rooms is already reserved or unready or out of service'];
-    //           }
-    //         }
-    //         else {
-    //           $result = ['result'=>'failed','reservation'=>null,'error'=>'suite id '.$suiteId.' is unexists'];
-    //         }
-    //       }
-    //       else {
-    //         // reservation is for only suite
-    //         $rooms = Room::where('SuiteId','=',$suiteId)->get();
-    //         $st = true ;
-    //         if ($rooms != null ) {
-    //           for ($i=0;$i<count($rooms);$i++) {
-    //             if ($rooms[$i]->roomStatus > 1) {
-    //               $st = false ;
-    //               break ;
-    //             }
-    //           }
-    //           if ($st) {
-    //             $suite = Suite::find($suiteId);
-    //             if ($suite != null) {
-    //               $reservRes = $this->insertReservation([
-    //                 'RoomNumber' => $suite->SuiteNumber,
-    //                   'ClientId' => $clientId,
-    //                   'Status' => 1,
-    //                   'RoomOrSuite' => $roomOrSuite,
-    //                   'MultiRooms' => $multiRooms,
-    //                   'AddRoomNumber' => $addRoomsNumber,
-    //                   'AddRoomId' => $addRoomsIds,
-    //                   'StartDate' => $start,
-    //                   'Nights' => $nights,
-    //                   'EndDate' => $end,
-    //                   'Hotel' => 1,
-    //                   'BuildingNo' =>$buildingNumber,
-    //                   'Floor' => $floorNumber,
-    //                   'ClientFirstName' => $firstName,
-    //                   'ClientLastName' => $lastName,
-    //                   'IdType' => $idType,
-    //                   'IdNumber' => $idNumber,
-    //                   'MobileNumber' => $mobile,
-    //                   'Email' => $email,
-    //                   'Rating' => 0
-    //               ]);
-    //               if ($reservRes['res'] == 'success') {
-    //                 $reservation = $reservRes['reservation'];
-    //                 $suiteRes = $this->reserveSuiteInDB($suite);
-    //                 if ($suiteRes['res'] == 'success') {
-    //                   if($this->reserveSuiteInFirebase($suite)){
-    //                     for ($i=0;$i<count($rooms);$i++) {
-    //                       $this->reserveSuiteRoomInDB($rooms[$i],$reservation->id);
-    //                       $this->reserveRoomInFirebase($rooms[$i],$reservation);
-    //                       $this->sendMessageToRoom($rooms[$i],$reservation,'message');
-    //                       $this->checkinRoom($rooms[$i],$reservation);
-    //                     }
-    //                     $result = ['result'=>'success','reservation'=>$reservation,'error'=>null];
-    //                     DB::commit();
-    //                   }
-    //                   else {
-    //                     $result = ['result'=>'failed','reservation'=>null,'unable to reserve suite in firebase'];
-    //                     DB::rollBack();
-    //                   }
-    //                 }
-    //                 else {
-    //                   $error = $suiteRes['error'];
-    //                   $result = ['result'=>'failed','reservation'=>null,'unable to save reservation '.$error];
-    //                   DB::rollBack();
-    //                 }
-    //               }
-    //               else {
-    //                 $error = $reservRes['error'];
-    //                 $result = ['result'=>'failed','reservation'=>null,'unable to save reservation '.$error];
-    //                 DB::rollBack();
-    //               }
-    //             }
-    //             else {
-    //               $result = ['result'=>'failed','reservation'=>null,'error'=>'suite id '.$suiteId.' is unexists'];
-    //             }
-    //           }
-    //           else {
-    //             $result = ['result'=>'failed','reservation'=>null,'error'=>'one of the suite rooms is already reserved or unready or out of service'];
-    //           }
-    //         }
-    //         else {
-    //           $result = ['result'=>'failed','reservation'=>null,'error'=>'suite id '.$suiteId.' is unexists'];
-    //         }
-    //       }
-    //     }
-    //   }
-    //   catch(Exception $e) {
-    //     DB::rollback();
-    //     return ['result'=>'failed','reservation'=>null,'error'=>$e->getMessage()];
-    //   }
-    // }
-
-
-
-    //check
-
-
-    // public function editIDRoom()
-    // {
-    //     $bookings = Booking::all();
-
-    //     foreach ($bookings as $booking) {
-    //         $room = Room::where('RoomNumber', $booking->RoomNumber)->first();
-    //         if ($room) {
-    //             $booking->RoomId = $room->id;
-    //             $booking->save();
-    //         }
-    //     }
-    // }
-
-
-    function checkReservation(Request $request)
+    public static function addClientNew(Request $request)
     {
-        $validation = Validator::make($request->all(), [
-            'building_id' => 'required|numeric|exists:buildings,id',
-            'floor_id' => 'nullable|numeric',
-            'room_type' => 'nullable|numeric',
-            'start_date' => 'required|date',
-            'expire_date' => 'required|date',
-            'type_search' => 'required|numeric|in:1,2',   // 1=>First Available Room 2=> All Room
+        $validator = Validator::make($request->all(), [
+            'first_name' => 'required|max:50|min:2',
+            'last_name' => 'required|max:50|min:2',
+            'international_code' => 'required|numeric',
+            'mobile' => 'required|max:10|min:10|string|unique:clients,Mobile',
+            'email' => 'max:50|nullable|email',
+            'id_type' => 'required|in:ID,PASSPORT',
+            'id_number' => 'required|max:20',
         ]);
-        if ($validation->fails()) {
-            return response(['result' => 'failed', 'code' => 0, 'error' => $validation->errors()], 200);
-        }
-        $availableRooms = array();
-        $roomsQuery = Room::where('building_id', '=', $request->building_id);
-        if ($request->filled('floor_id')) {
-            $roomsQuery->where('floor_id', '=', $request->floor_id);
-        }
-        if ($request->filled('room_type')) {
-            $roomsQuery->where('RoomTypeId', '=', $request->room_type);
-        }
-        //roomStatus=4 => Room is not Available
-        $rooms = $roomsQuery->where('roomStatus', '!=', 4)->get();
-        if (count($rooms) > 0) {
-            foreach ($rooms as $room) {
-                $checkReservationForRoom = Booking::where('RoomId', '=', $room->id)
-                    //تجاهل الحجوزات القديمة يلي خلصت قبل تاريخ البداية
-                    ->where('EndDate', '>=', $request->start_date)
-                    ->where(function ($query) use ($request) {
-                        //بداية الحجز القديم داخلة ضمن المدة يلي طلبتها
-                        $query->whereBetween('StartDate', [$request->start_date, $request->expire_date])
-                            //نهاية الحجز القديم داخلة ضمن المدة يلي طلبتها
-                            ->orWhereBetween('EndDate', [$request->start_date, $request->expire_date])
-                            //الحجز القديم داخل يكل الفترة يلي طلبتها
-                            ->orWhere(function ($query) use ($request) {
-                            $query->where('StartDate', '<=', $request->start_date)
-                                ->where('EndDate', '>=', $request->expire_date);
-                        }, );
-                    }, )->first();
-                switch ($request->type_search) {
-                    case 1: // غرفة فارغة: أول غرفة فارغة بترجع فوراً
-                        if (!$checkReservationForRoom) {
-                            $roomInfo = $room->toArray();
-                            return ['result' => 'success', 'code' => 1, "AvailableRooms" => [$roomInfo], "error" => ""];
-                        }
-                        break;
-                    case 2: // جميع الغرف الفارغة
-                        if (!$checkReservationForRoom) {
-                            $roomInfo = $room->toArray();
-                            // $roomInfo = $room->RoomNumber;
-                            array_push($availableRooms, $roomInfo);
-                        }
-                        break;
-                }
-            }
 
-            if (count($availableRooms) > 0) {
-                return ['result' => 'success', 'code' => 1, "AvailableRooms" => $availableRooms, "error" => ""];
-            }
-            return ['result' => 'failed', 'code' => 0, "AvailableRooms" => [], "error" => "No available rooms found"];
-        } else {
-            return ['result' => 'failed', 'code' => 0, "AvailableRooms" => [], "error" => "Rooms Not Found"];
+        if ($validator->fails()) 
+        {
+            return ['result' => 'failed', 'insertedRow' => '', 'error' => $validator->errors()];
+        }
+
+        try 
+        {
+            $client = new Client();
+            $client->FirstName = $request->first_name;
+            $client->LastName = $request->last_name;
+            $client->Mobile = $request->mobile;
+            $client->Email = $request->email;
+            $client->IdType = $request->id_type;
+            $client->IdNumber = $request->id_number;
+            $client->save();
+            return ['result' => 'success', 'client' => $client, 'error' => ''];
+        } 
+        catch (Exception $e) 
+        {
+            return ['result' => 'failed', 'client' => null, 'error' => $e->getMessage()];
         }
     }
 
-    public function checkReservationByRoom($roomId, $startDate, $expireDate)
-    {
-        $check = false;
-        $room = Room::where('id', $roomId)->where('roomStatus', '!=', 4)->first();
-        if ($room) {
-            $check = Booking::where('RoomId', $room->id)
-                ->where('EndDate', '>=', $startDate)
-                ->where(function ($query) use ($startDate, $expireDate) {
-                    $query->whereBetween('StartDate', [$startDate, $expireDate])
-                        ->orWhereBetween('EndDate', [$startDate, $expireDate])
-                        ->orWhere(function ($query) use ($startDate, $expireDate) {
-                            $query->where('StartDate', '<=', $startDate)
-                                ->where('EndDate', '>=', $expireDate);
-                        });
-                })->exists();
-        }
-        return $check; // true = الغرفة محجوزة، false = الغرفة متاحة
-    }
-
+        // reserve room
     public function addRoomReservation(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -810,10 +334,249 @@ class Reservations extends Controller
             }
         }
     }
+    public function addRoomReservationNew(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'room_id' => 'required|numeric|exists:rooms,id',
+            'client_id' => 'required|numeric|min:1|exists:clients,id',
+            'start_date' => 'required|date',
+            'nights' => 'required|numeric|min:1',
+            'multi_rooms' => 'required|numeric|in:0,1',
+            'add_rooms_ids' => 'required',
+            'guest_control' => 'required|numeric',
+        ]);
+        if ($validator->fails()) 
+        {
+            return ['result' => 'failed', 'reservation' => null, 'error' => $validator->errors()];
+        }
+        $client = Client::find($request->client_id);
+        $room = Room::find($request->room_id);
+        $building = Building::find($room->building_id);
+        $floor = Floor::find($room->floor_id);
 
+        $firstName = $client->FirstName;
+        $lastName = $client->LastName;
+        $idType = $client->IdType;
+        $idNumber = $client->IdNumber;
+        $mobile = $client->Mobile;
+        $email = '';
+        if ($request->email != null) 
+        {
+            $email = $request->email;
+        }
+        $multiRooms = $request->multi_rooms;
+        $startDate = $request->start_date;
+        $nights = $request->nights;
+        $guestControl = $request->guest_control;
+        $endDate = DateTimeManager::getReservationEndDate($startDate, $nights);
+        $addRoomsIds = $request->add_rooms_ids;
 
-
-
+        if ($multiRooms > 0) 
+        {
+            // reservation is for room + additional room/s
+            if ($room->roomStatus == 1) 
+            {
+                $additionalRooms = roomsManagement::getRoomsByStringIds($addRoomsIds);
+                $addRoomsNumber = roomsManagement::getRoomsNumbersByStringIds($addRoomsIds);
+                if (count($additionalRooms) == 0) 
+                {
+                    return ['result' => 'failed', 'reservation' => '', 'error' => 'additional room ids ' . $request->add_rooms_ids . ' is invailed'];
+                }
+                //check all room unreserved
+                $st = roomsManagement::isAnyRoomReserved($additionalRooms);
+                if ($st == false) 
+                {
+                    DB::beginTransaction();
+                    $randomNumber = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+                    // insert new reservation
+                    $reserveRes = $this->insertReservation([
+                        'RoomNumber' => $room->RoomNumber,
+                        'ClientId' => $client->id,
+                        'Status' => 1,
+                        'RoomOrSuite' => 1,
+                        'MultiRooms' => 1,
+                        'AddRoomNumber' => $addRoomsNumber,
+                        'AddRoomId' => $addRoomsIds,
+                        'StartDate' => $startDate,
+                        'Nights' => $nights,
+                        'EndDate' => $endDate,
+                        'BuildingNo' => $building->buildingNo,
+                        'Floor' => $floor->floorNumber,
+                        'ClientFirstName' => $firstName,
+                        'ClientLastName' => $lastName,
+                        'IdType' => $idType,
+                        'IdNumber' => $idNumber,
+                        'MobileNumber' => $mobile,
+                        'Email' => $email,
+                        'Rating' => 0,
+                        'password' => password_hash($randomNumber, PASSWORD_DEFAULT),
+                        'GuestControl' => $guestControl
+                    ]);
+                    if ($reserveRes['res'] == 'success') 
+                    {
+                        $reservation = $reserveRes['reservation'];
+                        $roomRes = $this->reserveRoomInDB($room, $reservation->id);
+                        if ($roomRes['res'] == 'success') 
+                        {
+                            $room = $roomRes['room'];
+                            $this->sendMessageToRoom($room, $reservation, 'message');
+                            $res = "";
+                            if ($this->isGuestApp()) 
+                            {
+                                $res = $this->sendConfermationSMSToClient($room, $reservation, $randomNumber);
+                            }
+                            $anyRoomAlreadyReserved = false;
+                            $roomAlreadyReserved = null;
+                            $allRoomsReservedStatus = true;
+                            $roomReservetionFailed = null;
+                            $reservetionError = '';
+                            
+                            for ($i = 0; $i < count($additionalRooms); $i++) 
+                            {
+                                if ($additionalRooms[$i]->isRoomReserved() == false) 
+                                {
+                                    $roomResult = $this->reserveRoomInDB($additionalRooms[$i], $reservation->id);
+                                    if ($roomResult['res'] == 'success') 
+                                    {
+                                        $this->sendMessageToRoom($additionalRooms[$i], $reservation, 'message');
+                                    }
+                                    else 
+                                    {
+                                        $allRoomsReservedStatus = false;
+                                        $roomReservetionFailed  = $additionalRooms[$i];
+                                        $reservetionError = $roomResult['error'];
+                                        break;
+                                    }
+                                }
+                                else 
+                                {
+                                    $anyRoomAlreadyReserved = true;
+                                    $roomAlreadyReserved = $additionalRooms[$i];
+                                    break;
+                                }
+                            }
+                            if ($anyRoomAlreadyReserved == false && $allRoomsReservedStatus) 
+                            {
+                                DB::commit();
+                                return ['result' => 'success', 'reservation' => $reservation, 'error' => '', 'sms' => $res];
+                            }
+                            else if ($anyRoomAlreadyReserved) 
+                            {
+                                DB::rollBack();
+                                return ['result' => 'failed', 'reservation' => '', 'error' => 'room number ' . $roomAlreadyReserved->RoomNumber . ' is already reserved'];
+                            }
+                            else if (!$allRoomsReservedStatus) 
+                            {
+                                DB::rollBack();
+                                return ['result' => 'failed', 'reservation' => '', 'error' => 'room number ' . $roomReservetionFailed ->RoomNumber . ' reservetion failed '.$reservetionError];
+                            }
+                        } 
+                        else 
+                        {
+                            DB::rollBack();
+                            $error = $roomRes['error'];
+                            return ['result' => 'failed', 'reservation' => '', 'error' => 'unable to reserve room ' . $error];
+                        }
+                    } 
+                    else 
+                    {
+                        $error = $reserveRes['error'];
+                        return ['result' => 'failed', 'reservation' => '', 'error' => 'unable to insert reservation ' . $error];
+                    }
+                } 
+                else 
+                {
+                    return ['result' => 'failed', 'reservation' => '', 'error' => 'one of the additional rooms is already reserved or unready or out of service'];
+                }
+            } 
+            else if ($room->roomStatus == 2) 
+            {
+                return ['result' => 'failed', 'reservation' => '', 'error' => 'room is already reserved'];
+            } 
+            else if ($room->roomStatus == 3) 
+            {
+                return ['result' => 'failed', 'reservation' => '', 'error' => 'room is unready'];
+            } 
+            else if ($room->roomStatus == 4) 
+            {
+                return ['result' => 'failed', 'reservation' => '', 'error' => 'room is out of service'];
+            }
+        } 
+        else 
+        {
+            // reservation is for single room
+            if ($room->roomStatus == 1) 
+            {
+                DB::beginTransaction();
+                $randomNumber = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+                $insertResult = $this->insertReservation([
+                    'RoomNumber' => $room->RoomNumber,
+                    'ClientId' => $client->id,
+                    'Status' => 1,
+                    'RoomOrSuite' => 1,
+                    'MultiRooms' => 0,
+                    'AddRoomNumber' => '0',
+                    'AddRoomId' => $addRoomsIds,
+                    'StartDate' => $startDate,
+                    'Nights' => $nights,
+                    'EndDate' => $endDate,
+                    'Hotel' => 1,
+                    'BuildingNo' => $building->buildingNo,
+                    'Floor' => $floor->floorNumber,
+                    'ClientFirstName' => $firstName,
+                    'ClientLastName' => $lastName,
+                    'IdType' => $idType,
+                    'IdNumber' => $idNumber,
+                    'MobileNumber' => $mobile,
+                    'Email' => $email,
+                    'Rating' => 0,
+                    'password' => password_hash($randomNumber, PASSWORD_DEFAULT),
+                    'GuestControl' => $guestControl
+                ]);
+                if ($insertResult['res'] == 'success') 
+                {
+                    $reservation = $insertResult['reservation'];
+                    $roomRes = $this->reserveRoomInDB($room, $reservation->id);
+                    if ($roomRes['res'] == 'success') 
+                    {
+                        DB::commit();
+                        $this->sendMessageToRoom($room, $reservation, 'message');
+                        $res = "";
+                        if ($this->isGuestApp() && $guestControl == 1) 
+                        {
+                            $res = $this->sendConfermationSMSToClient($room, $reservation, $randomNumber);
+                        }
+                        return ['result' => 'success', 'reservation' => $reservation, 'error' => '', 'sms' => $res];
+                    }
+                    else 
+                    {
+                        $error = $roomRes['error'];
+                        DB::rollback();
+                        return ['result' => 'failed', 'reservation' => '', 'error' => 'error reserve room in database ' . $error];
+                    }
+                }
+                else 
+                {
+                    $error = $insertResult['error'];
+                    DB::rollback();
+                    return ['result' => 'failed', 'reservation' => '', 'error' => 'error saving reservation ' . $error];
+                }
+            } 
+            else if ($room->roomStatus == 2) 
+            {
+                return ['result' => 'failed', 'reservation' => '', 'error' => 'room ' . $room->RoomNumber . ' is already reserved'];
+            } 
+            else if ($room->roomStatus == 3) 
+            {
+                return ['result' => 'failed', 'reservation' => '', 'error' => 'room ' . $room->RoomNumber . ' is unready'];
+            } 
+            else if ($room->roomStatus == 4) 
+            {
+                return ['result' => 'failed', 'reservation' => '', 'error' => 'room ' . $room->RoomNumber . ' is out of service'];
+            }
+        }
+    }
+        // reserve suite
     public function addSuiteReservation(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -1031,6 +794,407 @@ class Reservations extends Controller
             }
         }
     }
+    public function addSuiteReservationNew(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'suite_id' => 'required|numeric|exists:suites,id',
+            'start_date' => 'required|date',
+            'nights' => 'required|numeric|min:1',
+            'multi_rooms' => 'required|numeric|in:0,1',
+            'add_rooms_ids' => 'required',
+            'client_id' => 'required|numeric|exists:clients,id',
+            'guest_control' => 'required|numeric',
+        ]);
+        if ($validator->fails()) 
+        {
+            return ['result' => 'failed', 'reservation' => null, 'error' => $validator->errors()];
+        }
+
+        $suite = Suite::find($request->suite_id);
+
+        $client = Client::find($request->client_id);
+
+        $firstName = $client->FirstName;
+        $lastName = $client->LastName;
+        $mobile = $client->Mobile;
+        $idType = $client->IdType;
+        $idNumber = $client->IdNumber;
+        $startDate = $request->start_date;
+        $nights = $request->nights;
+        $multiRooms = $request->multi_rooms;
+        $addRoomsIds = $request->add_rooms_ids;
+        $guestControl = $request->guest_control;
+        $endDate = DateTimeManager::getReservationEndDate($startDate,$nights);
+        $email = '';
+        if ($request->email != null) 
+        {
+            $email = $request->email;
+        }
+        
+        if ($multiRooms > 0) 
+        {
+
+            $suiteRooms = Room::where('SuiteId', $suite->id)->get();
+            if ($suiteRooms == null || count($suiteRooms) == 0) 
+            {
+                return ['result' => 'failed', 'reservation' => '', 'error' => 'no rooms in suite number ' . $suite->SuiteNumber];
+            }
+            $additionalRooms = roomsManagement::getRoomsByStringIds($addRoomsIds);
+            $addRoomsNumber = roomsManagement::getRoomsNumbersByStringIds($addRoomsIds);
+
+            $st = roomsManagement::isAnyRoomReserved($suiteRooms);
+
+            if ($st) 
+            {
+                return ['result' => 'failed', 'reservation' => null, 'error' => 'one of the suite rooms is already reserved or unready or out of service'];
+            }
+
+            $stt = roomsManagement::isAnyRoomReserved($additionalRooms);
+
+            if ($stt) 
+            {
+                return ['result' => 'failed', 'reservation' => '', 'error' => 'one of the additional rooms is already reserved or unready or out of service'];
+            }
+
+            $randomNumber = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+            DB::beginTransaction();
+            $reserveRes = $this->insertReservation([
+                'RoomNumber' => $suite->SuiteNumber,
+                'ClientId' => $client->id,
+                'Status' => 1,
+                'RoomOrSuite' => 2,
+                'MultiRooms' => 1,
+                'AddRoomNumber' => $addRoomsNumber,
+                'AddRoomId' => $addRoomsIds,
+                'StartDate' => $startDate,
+                'Nights' => $nights,
+                'EndDate' => $endDate,
+                'Hotel' => 1,
+                'BuildingNo' => $suite->Building,
+                'Floor' => $suite->Floor,
+                'ClientFirstName' => $firstName,
+                'ClientLastName' => $lastName,
+                'IdType' => $idType,
+                'IdNumber' => $idNumber,
+                'MobileNumber' => $mobile,
+                'Email' => $email,
+                'password' => password_hash($randomNumber, PASSWORD_DEFAULT),
+                'Rating' => 0
+            ]);
+            if ($reserveRes['res'] == 'success') 
+            {
+                $reservation = $reserveRes['reservation'];
+                $suiteRes = $this->reserveSuiteInDB($suite);
+                if ($suiteRes['res'] == 'success') 
+                {
+                    $res = "";
+                    if ($this->isGuestApp()) 
+                    {
+                        $res = $this->sendConfermationSMSToClient($suiteRooms[0], $reservation, $randomNumber);
+                    }
+
+                    $anySuiteRoomsReserved = false;
+                    $suiteRoomReserveFailed = false;
+                    $suiteReserveError = '';
+                    $errorRoom = null;
+
+                    for ($i = 0; $i < count($suiteRooms); $i++) 
+                    {
+                        if ($suiteRooms[$i]->isRoomReserved()) 
+                        {
+                            $anySuiteRoomsReserved = true;
+                            $errorRoom = $suiteRooms[$i];
+                            break;
+                        }
+                        else 
+                        {
+                            $rrRes = $this->reserveSuiteRoomInDB($suiteRooms[$i], $reservation->id);
+                            if ($rrRes['res'] == 'success') 
+                            {
+                                $this->sendMessageToRoom($suiteRooms[$i], $reservation, 'message');
+                            }
+                            else 
+                            {
+                                $suiteRoomReserveFailed = true;
+                                $errorRoom = $suiteRooms[$i];
+                                $suiteReserveError = $rrRes['error'];
+                                break;
+                            }
+                        }
+                        
+                    }
+                    if ($anySuiteRoomsReserved) 
+                    {
+                        DB::rollBack();
+                        return ['result' => 'failed', 'reservation' => '', 'error' => 'room number '.$errorRoom->RoomNumber. ' is already reserved' ];
+                    }
+                    if ($suiteRoomReserveFailed) 
+                    {
+                        DB::rollBack();
+                        return ['result' => 'failed', 'reservation' => '', 'error' => 'room number '.$errorRoom->RoomNumber. ' reservetion failed ' . $suiteReserveError  ];
+                    }
+                    $anyAdditionalRoomReserved = false;
+                    $additionalRoomReservationFailed = false;
+                    $reserveError = '';
+                    $errorRoom0 = null;
+                    for ($i = 0; $i < count($additionalRooms); $i++) 
+                    {
+                        $additionalRooms[$i]->refresh();
+                        if ($additionalRooms[$i]->isRoomReserved()) 
+                        {
+                            $anyAdditionalRoomReserved = true;
+                            $errorRoom0 = $additionalRooms[$i];
+                            break;
+                        }
+                        else 
+                        {
+                            $rrRes = $this->reserveRoomInDB($additionalRooms[$i], $reservation->id);
+                            if ($rrRes['res'] == 'success') 
+                            {
+                                $this->sendMessageToRoom($additionalRooms[$i], $reservation, 'message');
+                            }
+                            else 
+                            {
+                                $additionalRoomReservationFailed = true;
+                                $reserveError = $rrRes['error'];
+                                $errorRoom0 = $additionalRooms[$i];
+                                break;
+                            }
+                        }
+                    }
+                    if ($anyAdditionalRoomReserved) 
+                    {
+                        DB::rollBack();
+                        return ['result' => 'failed', 'reservation' => '', 'error' => 'room number '.$errorRoom0->RoomNumber. ' is already reserved' ];
+                    }
+                    if ($additionalRoomReservationFailed) 
+                    {
+                        DB::rollBack();
+                        return ['result' => 'failed', 'reservation' => '', 'error' => 'room number '.$errorRoom0->RoomNumber. ' reservetion failed ' . $reserveError ];
+                    }
+                    DB::commit();
+                    return ['result' => 'success', 'reservation' => $reservation, 'error' => null, 'sms' => $res];
+                }
+                else 
+                {
+                    DB::rollBack();
+                    $error = $suiteRes['error'];
+                    return ['result' => 'failed', 'reservation' => '', 'error' => 'unable to reserve room ' . $error];
+                }
+            }
+            else 
+            {
+                $error = $reserveRes['error'];
+                return ['result' => 'failed', 'reservation' => '', 'error' => 'unable to insert reservation ' . $error];
+            }
+        } 
+        else 
+        {
+            $suiteRooms = Room::where('SuiteId', $suite->id)->get();
+            
+            if ($suiteRooms == null || count($suiteRooms) == 0) 
+            {
+                return ['result' => 'failed', 'reservation' => '', 'error' => 'suite id ' . $suite->id . ' is unexists'];
+            }
+
+            $st = roomsManagement::isAnyRoomReserved($suiteRooms);
+
+            if ($st == false) {
+                return ['result' => 'failed', 'reservation' => '', 'error' => 'one of the suite rooms is already reserved or unready or out of service'];
+            }
+
+            $randomNumber = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+            DB::beginTransaction();
+            $reservRes = $this->insertReservation([
+                'RoomNumber' => $suite->SuiteNumber,
+                'ClientId' => $client->id,
+                'Status' => 1,
+                'RoomOrSuite' => 2,
+                'MultiRooms' => $multiRooms,
+                'AddRoomNumber' => 0,
+                'AddRoomId' => $addRoomsIds,
+                'StartDate' => $startDate,
+                'Nights' => $nights,
+                'EndDate' => $endDate,
+                'Hotel' => 1,
+                'BuildingNo' => $suite->Building,
+                'Floor' => $suite->Floor,
+                'ClientFirstName' => $firstName,
+                'ClientLastName' => $lastName,
+                'IdType' => $idType,
+                'IdNumber' => $idNumber,
+                'MobileNumber' => $mobile,
+                'Email' => $email,
+                'Rating' => 0,
+                'password' => password_hash($randomNumber, PASSWORD_DEFAULT),
+                'GuestControl' => $guestControl
+            ]);
+            if ($reservRes['res'] == 'success') 
+            {
+                $reservation = $reservRes['reservation'];
+                $suiteRes = $this->reserveSuiteInDB($suite);
+                if ($suiteRes['res'] == 'success') 
+                {
+                    $res = "";
+                    if ($this->isGuestApp()) 
+                    {
+                        $res = $this->sendConfermationSMSToClient($suiteRooms[0], $reservation, $randomNumber);
+                    }
+
+                    $anySuiteRoomsReserved = false;
+                    $suiteRoomReserveFailed = false;
+                    $suiteReserveError = '';
+                    $errorRoom = null;
+
+                    for ($i = 0; $i < count($suiteRooms); $i++) 
+                    {
+                        if ($suiteRooms[$i]->isRoomReserved()) 
+                        {
+                            $anySuiteRoomsReserved = true;
+                            $errorRoom = $suiteRooms[$i];
+                            break;
+                        }
+                        else 
+                        {
+                            $rrRes = $this->reserveSuiteRoomInDB($suiteRooms[$i], $reservation->id);
+                            if ($rrRes['res'] == 'success') 
+                            {
+                                $this->sendMessageToRoom($suiteRooms[$i], $reservation, 'message');
+                            }
+                            else 
+                            {
+                                $suiteRoomReserveFailed = true;
+                                $errorRoom = $suiteRooms[$i];
+                                $suiteReserveError = $rrRes['error'];
+                                break;
+                            }
+                        }
+                    }
+                    if ($anySuiteRoomsReserved) 
+                    {
+                        DB::rollBack();
+                        return ['result' => 'failed', 'reservation' => '', 'error' => 'room number '.$errorRoom->RoomNumber. ' is already reserved' ];
+                    }
+                    if ($suiteRoomReserveFailed) 
+                    {
+                        DB::rollBack();
+                        return ['result' => 'failed', 'reservation' => '', 'error' => 'room number '.$errorRoom->RoomNumber. ' reservetion failed ' . $suiteReserveError  ];
+                    }
+
+                    DB::commit();
+                    return ['result' => 'success', 'reservation' => $reservation, 'error' => '', 'sms' => $res];
+                } 
+                else 
+                {
+                    DB::rollBack();
+                    $error = $suiteRes['error'];
+                    return ['result' => 'failed', 'reservation' => '', 'unable to save reservation ' . $error];
+                }
+            } 
+            else 
+            {
+                $error = $reservRes['error'];
+                return ['result' => 'failed', 'reservation' => '', 'unable to save reservation ' . $error];
+            }
+        }
+    }
+
+
+
+    function checkReservation(Request $request)
+    {
+        $validation = Validator::make($request->all(), [
+            'building_id' => 'required|numeric|exists:buildings,id',
+            'floor_id' => 'nullable|numeric|exists:floors,id',
+            'room_type' => 'nullable|numeric',
+            'start_date' => 'required|date',
+            'expire_date' => 'required|date',
+            'type_search' => 'required|numeric|in:1,2',   // 1=>First Available Room 2=> All Room
+        ]);
+        if ($validation->fails()) 
+        {
+            return response(['result' => 'failed', 'code' => 0, 'error' => $validation->errors()], 200);
+        }
+        $availableRooms = array();
+        $roomsQuery = Room::where('building_id', '=', $request->building_id);
+        if ($request->filled('floor_id')) 
+        {
+            $roomsQuery->where('floor_id', '=', $request->floor_id);
+        }
+        if ($request->filled('room_type')) 
+        {
+            $roomsQuery->where('RoomTypeId', '=', $request->room_type);
+        }
+        //roomStatus=4 => Room is not Available
+        $rooms = $roomsQuery->where('roomStatus', '!=', 4)->get();
+        if (count($rooms) > 0) 
+        {
+            foreach ($rooms as $room) 
+            {
+                $checkReservationForRoom = Booking::where('RoomId', '=', $room->id)
+                    //تجاهل الحجوزات القديمة يلي خلصت قبل تاريخ البداية
+                    ->where('EndDate', '>=', $request->start_date)
+                    ->where(function ($query) use ($request) {
+                        //بداية الحجز القديم داخلة ضمن المدة يلي طلبتها
+                        $query->whereBetween('StartDate', [$request->start_date, $request->expire_date])
+                            //نهاية الحجز القديم داخلة ضمن المدة يلي طلبتها
+                            ->orWhereBetween('EndDate', [$request->start_date, $request->expire_date])
+                            //الحجز القديم داخل يكل الفترة يلي طلبتها
+                            ->orWhere(function ($query) use ($request) {
+                            $query->where('StartDate', '<=', $request->start_date)
+                                ->where('EndDate', '>=', $request->expire_date);
+                        }, );
+                    }, )->first();
+                switch ($request->type_search) {
+                    case 1: // غرفة فارغة: أول غرفة فارغة بترجع فوراً
+                        if (!$checkReservationForRoom) {
+                            $roomInfo = $room->toArray();
+                            return ['result' => 'success', 'code' => 1, "AvailableRooms" => [$roomInfo], "error" => ""];
+                        }
+                        break;
+                    case 2: // جميع الغرف الفارغة
+                        if (!$checkReservationForRoom) {
+                            $roomInfo = $room->toArray();
+                            // $roomInfo = $room->RoomNumber;
+                            array_push($availableRooms, $roomInfo);
+                        }
+                        break;
+                }
+            }
+
+            if (count($availableRooms) > 0) {
+                return ['result' => 'success', 'code' => 1, "AvailableRooms" => $availableRooms, "error" => ""];
+            }
+            return ['result' => 'failed', 'code' => 0, "AvailableRooms" => [], "error" => "No available rooms found"];
+        } 
+        else 
+        {
+            return ['result' => 'failed', 'code' => 0, "AvailableRooms" => [], "error" => "Rooms Not Found"];
+        }
+    }
+
+    public function checkReservationByRoom($roomId, $startDate, $expireDate)
+    {
+        $check = false;
+        $room = Room::where('id', $roomId)->where('roomStatus', '!=', 4)->first();
+        if ($room) {
+            $check = Booking::where('RoomId', $room->id)
+                ->where('EndDate', '>=', $startDate)
+                ->where(function ($query) use ($startDate, $expireDate) {
+                    $query->whereBetween('StartDate', [$startDate, $expireDate])
+                        ->orWhereBetween('EndDate', [$startDate, $expireDate])
+                        ->orWhere(function ($query) use ($startDate, $expireDate) {
+                            $query->where('StartDate', '<=', $startDate)
+                                ->where('EndDate', '>=', $expireDate);
+                        });
+                })->exists();
+        }
+        return $check; // true = الغرفة محجوزة، false = الغرفة متاحة
+    }
+
+    
+
+    
 
     public function addCleanupOrder(Request $request)
     {
@@ -4776,9 +4940,6 @@ class Reservations extends Controller
             $result = ['result' => 'failed', 'reservation' => null, 'error' => $validator->errors()];
             return $result;
         }
-        if (!Users::checkAuth($request->input('my_token'))) {
-            return ['result' => 'failed', 'reservation' => '', 'error' => 'you are unauthorized user'];
-        }
         $reservationId = $request->input('reservation_id');
         $reservation = Booking::find($reservationId);
         if ($reservation == null) {
@@ -4985,7 +5146,6 @@ class Reservations extends Controller
 
     public function reserveRoomInFirebase(Room $room, Booking $b)
     {
-
         if ($b->RoomOrSuite == 1) {
             $arrRoom = [
                 'ReservationNumber' => $b->id,
@@ -5635,7 +5795,6 @@ class Reservations extends Controller
         $reserve->StartDate = $params['StartDate'];
         $reserve->Nights = $params['Nights'];
         $reserve->EndDate = $params['EndDate'];
-        $reserve->Hotel = $params['Hotel'];
         $reserve->BuildingNo = $params['BuildingNo'];
         $reserve->Floor = $params['Floor'];
         $reserve->ClientFirstName = $params['ClientFirstName'];
@@ -5672,47 +5831,32 @@ class Reservations extends Controller
 
     public function reserveRoomInDB(Room $room, int $reservId)
     {
-        $room->Cleanup = 0;
-        $room->Laundry = 0;
-        $room->RoomService = 0;
-        $room->DND = 0;
-        $room->Restaurant = 0;
-        $room->RoomServiceText = '';
-        $room->dep = '0';
-        $room->Checkout = 0;
-        $room->SOS = 0;
-        $room->MiniBarCheck = 0;
         $room->ReservationNumber = $reservId;
         $room->roomStatus = 2;
-        try {
+
+        try 
+        {
             $room->save();
-            $res = ['res' => 'success', 'room' => $room];
-            return $res;
-        } catch (Exception $e) {
-            $res = ['res' => 'failed', 'error' => $e->getMessage()];
-            return $res;
+            return ['res' => 'success', 'room' => $room];
+        } 
+        catch (Exception $e) 
+        {
+            return['res' => 'failed', 'error' => $e->getMessage()];
         }
     }
 
     public function reserveSuiteRoomInDB(Room $room, int $reservId)
     {
-        $room->Cleanup = 0;
-        $room->Laundry = 0;
-        $room->RoomService = 0;
-        $room->DND = 0;
-        $room->Restaurant = 0;
-        $room->RoomServiceText = '';
-        $room->dep = '0';
-        $room->Checkout = 0;
-        $room->SOS = 0;
-        $room->MiniBarCheck = 0;
         $room->ReservationNumber = $reservId;
         $room->SuiteStatus = 2;
         $room->roomStatus = 2;
-        try {
+        try 
+        {
             $room->save();
             return ['res' => 'success', 'room' => $room];
-        } catch (Exception $e) {
+        } 
+        catch (Exception $e) 
+        {
             return ['res' => 'failed', 'error' => $e->getMessage()];
         }
     }
@@ -5720,10 +5864,13 @@ class Reservations extends Controller
     public function reserveSuiteInDB(Suite $suite)
     {
         $suite->Status = 1;
-        try {
+        try 
+        {
             $suite->save();
             return ['res' => 'success', 'suite' => $suite];
-        } catch (Exception $e) {
+        } 
+        catch (Exception $e) 
+        {
             echo $e->getMessage();
             return ['res' => 'failed', 'error' => $e->getMessage()];
         }

@@ -4,6 +4,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\roomsManagement;
 
+
+Route::group(['middleware' => 'auth:sanctum'],function () {
+    Route::get('/getbuildings',[roomsManagement::class,'getBuildings']);
+});
 // Add Routes
 Route::post('/addbuilding',[roomsManagement::class,'addbuilding']);
 
@@ -42,7 +46,7 @@ Route::delete('/deleteroomtype',[roomsManagement::class,'deleteRoomType']);
 Route::post('/deleteControlDevice',[roomsManagement::class,'deleteControlDevice']);
 
 // Get Routes
-Route::get('/getbuildings',[roomsManagement::class,'getBuildings']);
+
 
 Route::get('/getfloors',[roomsManagement::class,'getFloors']);
 

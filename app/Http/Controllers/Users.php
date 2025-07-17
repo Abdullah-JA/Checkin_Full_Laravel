@@ -24,34 +24,41 @@ class Users extends Controller
             'department' => 'max:40|in:Service,Cleanup,Laundry,RoomService,Restaurant,Reception'
         ]);
         if ($validator->fails()) {
-            $result = ['result' => 'failed', 'insertedRow' => null, 'error' => $validator->errors()];
-            return $result;
+            return ['result' => 'failed', 'insertedRow' => null, 'error' => $validator->errors()];
         }
+        // login from reception 
         if ($request->input('department') == null || $request->input('department') == "") {
-            $employee = Serviceemployee::where('jobNumber', $request->input('job_number'))->first();
+            $employee = Serviceemployee::where('jobNumber', $request->job_number)->first();
             if ($employee == null) {
                 return ['result' => 'failed', 'user' => null, 'error' => 'no such user'];
             } else if ($employee->department != "Admin" && $employee->department != "Reception") {
                 return ['result' => 'failed', 'user' => null, 'error' => 'not allowed to login to Reception'];
             }
-        } else {
-            $employee = Serviceemployee::where('jobNumber', $request->input('job_number'))->where('department', $request->input('department'))->first();
+        }
+        // login from service application 
+        else {
+            $employee = Serviceemployee::where('jobNumber', $request->job_number)->where('department', $request->department)->first();
             if ($employee == null) {
                 return ['result' => 'failed', 'user' => null, 'error' => 'no such user'];
             } else if ($employee->department == "Admin" || $employee->department == "Reception") {
                 return ['result' => 'failed', 'user' => null, 'error' => 'not allowed to login to Service app'];
             }
         }
-
-        if (password_verify($request->input('password'), $employee->password)) {
-            $myToken = Users::makeToken();
+        // check password 
+        if (password_verify($request->input('password'), $employee->password)) 
+        {
+            $myToken = $employee->createToken('token')->plainTextToken;//Users::makeToken();
             $employee->mytoken = $myToken;
             $employee->logedin = 1;
-            if ($employee->save()) {
+            try 
+            {
+                $employee->save();
                 $this->modifyUserMyTokenInFirebase($employee);
                 $this->setLogedinUserInFirebase($employee, 1);
                 return ['result' => 'success', 'my_token' => $employee->mytoken, 'user' => $employee, 'error' => ''];
-            } else {
+            } 
+            catch(Exception $e) 
+            {
                 return ['result' => 'failed', 'user' => '', 'error' => 'unable to verify user'];
             }
         } else {
@@ -377,7 +384,7 @@ class Users extends Controller
     function modifyUserMyTokenInFirebase(Serviceemployee $user)
     {
         $arrUser = ['mytoken' => $user->mytoken];
-        $response = Http::retry(3, 100)->patch($this->firebaseUrl . '/' . $this->projectName . 'ServiceUsers/' . $user->jobNumber . '.json', $arrUser);
+        $response = Http::patch($this->firebaseUrl . '/' . $this->projectName . 'ServiceUsers/' . $user->jobNumber . '.json', $arrUser);
         return $response->successful();
     }
 
@@ -398,8 +405,8 @@ class Users extends Controller
     function setLogedinUserInFirebase(Serviceemployee $user, int $status)
     {
         if ($status == 0 || $status == 1) {
-            $arrUser = ['logedin' => $user->logedin];
-            $response = Http::retry(3, 100)->patch($this->firebaseUrl . '/' . $this->projectName . 'ServiceUsers/' . $user->jobNumber . '.json', $arrUser);
+            $arrUser = ['logedin' => $status];
+            $response = Http::patch($this->firebaseUrl . '/' . $this->projectName . 'ServiceUsers/' . $user->jobNumber . '.json', $arrUser);
             return $response->successful();
         }
         return null;

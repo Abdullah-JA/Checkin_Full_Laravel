@@ -2182,5 +2182,42 @@ class roomsManagement extends Controller
     }
     
     
-    
+    public static function getRoomsByStringIds(string $stringIds) {
+      $ids = array();
+      $rooms = array();
+      if ($stringIds != 0) {
+        $ids = explode('-', $stringIds);
+      }
+      for ($i = 0; $i < count($ids); $i++) {
+        if (!empty($ids[$i])) {
+          $r = Room::find($ids[$i]);
+          $rooms[$i] = $r;
+        }
+      }
+      return $rooms;
+    }
+    public static function getRoomsNumbersByStringIds(string $stringIds) {
+      $addRoomsNumber = '';
+      $rooms = roomsManagement::getRoomsByStringIds($stringIds);
+      for ($i = 0; $i < count($rooms); $i++) {
+        if ($rooms[$i] != null) {
+            if ($i == 0) {
+                $addRoomsNumber = $rooms[$i]->RoomNumber;
+            } else {
+                $addRoomsNumber = $addRoomsNumber . '-' . $rooms[$i]->RoomNumber;
+            }
+        }
+      }
+      return $addRoomsNumber;
+    } 
+    public static function isAnyRoomReserved($rooms) {
+      $st = false;
+      for ($i = 0; $i < count($rooms); $i++) {
+        if ($rooms[$i]->roomStatus > 2) {
+          $st = true;
+          break;
+        }
+      }
+      return $st;
+    }
 }

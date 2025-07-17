@@ -4,11 +4,19 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Reservations;
 
+
+Route::group(['middleware' => 'auth:sanctum'],function () {
+    Route::post('/addClientNew', [Reservations::class, 'addClientNew']);
+    Route::post('/addRoomReservation', [Reservations::class, 'addRoomReservation']);
+    Route::post('/addRoomReservationNew', [Reservations::class, 'addRoomReservationNew']);
+    Route::post('/addSuiteReservationNew', [Reservations::class, 'addSuiteReservationNew']);
+});
+
 Route::post('/addClient', [Reservations::class, 'addClient']);
 
 Route::post('/addReservation', [Reservations::class, 'addReservation']);
 
-Route::post('/addRoomReservation', [Reservations::class, 'addRoomReservation']);
+
 
 Route::post('/addSuiteReservation', [Reservations::class, 'addSuiteReservation']);
 
