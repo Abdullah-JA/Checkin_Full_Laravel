@@ -23,7 +23,6 @@ class CreateInvoicereturns extends Migration
             $table->text('Notes')->nullable();
             $table->integer('CreatedBy')->unsigned();
             $table->foreign('CreatedBy')->references('id')->on('serviceemployees');
-
             $table->timestamps();
         });
     }
