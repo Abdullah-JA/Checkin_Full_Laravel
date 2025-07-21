@@ -13,4 +13,17 @@ class Room extends Model
     public function floor() {
       return $this->belongsTo('App/Models/Floor');
     }
+
+    public function isRoomReserved() {
+      return $this->roomStatus == 2;
+    }
+    public function isRoomReady() {
+      return $this->roomStatus == 1;
+    }
+    public function isRoomMaintenance() {
+      return $this->roomStatus == 4;
+    }
+    public function isRoomPrepare() {
+      return $this->roomStatus == 3;
+    }
 }

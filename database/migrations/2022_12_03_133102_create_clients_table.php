@@ -17,6 +17,7 @@ class CreateClientsTable extends Migration
             $table->increments('id');
             $table->string('FirstName', 50);
             $table->string('LastName', 50);
+            $table->string('international_code');
             $table->string('Mobile');
             $table->string('Email')->nullable(true);
             $table->enum('IdType', ['ID', 'PASSPORT']);
