@@ -61,4 +61,14 @@ Route::post('/deleteBookingSource', [Users::class, 'deleteBookingSource']);
 
 Route::get('/getBookingSources', [Users::class, 'getBookingSources']);
 
+Route::post('/addTaxName', [Users::class, 'addTaxName']);
 
+Route::post('/getTaxNames', [Users::class, 'getTaxNames']);
+
+Route::post('/deleteTaxName', [Users::class, 'deleteTaxName']);
+
+Route::post('/addPenaltie', [Users::class, 'addPenaltie']);
+
+Route::post('/getPenalties', [Users::class, 'getPenalties']);
+
+Route::post('/deletePenaltie', [Users::class, 'deletePenaltie']);

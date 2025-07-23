@@ -17,6 +17,9 @@ class CreateRoomtypesTable extends Migration
           $table->increments('id');
           $table->string('NameAr');
           $table->string('NameEn');
+          $table->double("RentDay");
+          $table->double("RentMonth");
+          $table->double("RentYear");
           $table->timestamps();
         });
     }

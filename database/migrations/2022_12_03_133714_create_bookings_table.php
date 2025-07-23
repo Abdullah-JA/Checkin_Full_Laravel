@@ -54,6 +54,8 @@ class CreateBookingsTable extends Migration
             $table->double('Total');
             $table->longText('FacilityIds');
             $table->tinyInteger('Logedin')->comment("0=> Guest is Logged In 1=>Guest is Not Logged In");
+            $table->integer('UserId');
+            $table->foreign('UserId')->references('id')->on('users');
             $table->date('LogedinDate');
             $table->timestamps();
         });

@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Invoice;
+use App\Models\Receipt;
+use App\Models\Account;
+use App\Models\Booking;
 use Validator;
 
 class Accounts extends Controller
@@ -180,9 +183,7 @@ class Accounts extends Controller
                 return ['result' => 'failed', 'error' => 'Receipt not found for this client'];
             }
         }
-
         $account = Account::create($request->all());
-
         return ['result' => 'success', 'account' => $account];
     }
 }

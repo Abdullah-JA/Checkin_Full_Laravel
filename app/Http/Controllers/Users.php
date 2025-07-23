@@ -13,9 +13,11 @@ use App\Models\GuestCategory;
 use App\Models\OtherFeatures;
 use App\Models\StayRason;
 use App\Models\BookingSources;
+use App\Models\TaxName;
+use App\Models\Penaltie;
+
 class Users extends Controller
 {
-    //
     public $firebaseUrl = 'https://checkin-62774-default-rtdb.asia-southeast1.firebasedatabase.app';
     public $projectName = 'apiTest';
 
@@ -30,7 +32,7 @@ class Users extends Controller
         if ($validator->fails()) {
             return ['result' => 'failed', 'insertedRow' => null, 'error' => $validator->errors()];
         }
-        // login from reception 
+        // login from reception
         if ($request->input('department') == null || $request->input('department') == "") {
             $employee = Serviceemployee::where('jobNumber', $request->job_number)->first();
             if ($employee == null) {
@@ -39,7 +41,7 @@ class Users extends Controller
                 return ['result' => 'failed', 'user' => null, 'error' => 'not allowed to login to Reception'];
             }
         }
-        // login from service application 
+        // login from service application
         else {
             $employee = Serviceemployee::where('jobNumber', $request->job_number)->where('department', $request->department)->first();
             if ($employee == null) {
@@ -48,21 +50,17 @@ class Users extends Controller
                 return ['result' => 'failed', 'user' => null, 'error' => 'not allowed to login to Service app'];
             }
         }
-        // check password 
-        if (password_verify($request->input('password'), $employee->password)) 
-        {
-            $myToken = $employee->createToken('token')->plainTextToken;//Users::makeToken();
+        // check password
+        if (password_verify($request->input('password'), $employee->password)) {
+            $myToken = $employee->createToken('token')->plainTextToken; //Users::makeToken();
             $employee->mytoken = $myToken;
             $employee->logedin = 1;
-            try 
-            {
+            try {
                 $employee->save();
                 $this->modifyUserMyTokenInFirebase($employee);
                 $this->setLogedinUserInFirebase($employee, 1);
                 return ['result' => 'success', 'my_token' => $employee->mytoken, 'user' => $employee, 'error' => ''];
-            } 
-            catch(Exception $e) 
-            {
+            } catch (Exception $e) {
                 return ['result' => 'failed', 'user' => '', 'error' => 'unable to verify user'];
             }
         } else {
@@ -535,7 +533,6 @@ class Users extends Controller
     public function getGuestCategory()
     {
         return GuestCategory::all();
-
     }
 
     public function addOtherFeature(Request $request)
@@ -713,5 +710,138 @@ class Users extends Controller
     public function getBookingSources()
     {
         return BookingSources::all();
+    }
+
+    public function addTaxName(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'type' => 'required|in:0,1', // 0 => fixed amount, 1 => percentage
+            'optional' => 'required|in:0,1', // 1=>Required 0=>NonRequired
+            'value' => 'required|numeric|min:0',
+            'name_ar' => 'required|string|max:100',
+            'name_en' => 'required|string|max:100',
+            'my_token' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return ['result' => 'failed', 'error' => $validator->errors()];
+        }
+
+        if (Users::checkAuth($request->input('my_token'))) {
+            // $tax = new TaxName();
+            // $tax->type = $request->type;
+            // $tax->value = $request->value;
+            // $tax->name_ar = $request->name_ar;
+            // $tax->name_en = $request->name_en;
+            // $tax->save();
+            $tax = TaxName::create($request->all());
+            return ['result' => 'success', 'tax_name' => $tax];
+        } else {
+            return ['result' => 'failed', 'tax_name' => '', 'error' => 'you are un authorized user'];
+        }
+    }
+
+    public function getTaxNames(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'my_token' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return ['result' => 'failed', 'error' => $validator->errors()];
+        }
+        if (Users::checkAuth($request->input('my_token'))) {
+            $taxes = TaxName::all();
+            return ['result' => 'success', 'tax_names' => $taxes];
+        } else {
+            return ['result' => 'failed', 'tax_names' => '', 'error' => 'you are un authorized user'];
+        }
+    }
+
+    public function deleteTaxName(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|integer|exists:taxnames,id',
+            'my_token' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return ['result' => 'failed', 'error' => $validator->errors()];
+        }
+
+        if (Users::checkAuth($request->input('my_token'))) {
+            $tax = TaxName::find($request->id);
+            $tax->delete();
+            return ['result' => 'success', 'message' => 'Tax name deleted successfully'];
+        } else {
+            return ['result' => 'failed', 'error' => 'you are un authorized user'];
+        }
+    }
+
+
+    public function addPenaltie(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'type' => 'required|in:0,1', // 0 => fixed amount, 1 => percentage
+            'value' => 'required|numeric|min:0',
+            'name_ar' => 'required|string|max:100',
+            'name_en' => 'required|string|max:100',
+            'my_token' => 'required'
+
+        ]);
+
+        if ($validator->fails()) {
+            return ['result' => 'failed', 'error' => $validator->errors()];
+        }
+
+        if (Users::checkAuth($request->input('my_token'))) {
+            $penaltie = new Penaltie();
+            $penaltie->type = $request->type;
+            $penaltie->value = $request->value;
+            $penaltie->name_ar = $request->name_ar;
+            $penaltie->name_en = $request->name_en;
+            $penaltie->save();
+
+            return ['result' => 'success', 'penaltie' => $penaltie];
+        } else {
+            return ['result' => 'failed', 'penaltie' => '', 'error' => 'you are un authorized user'];
+        }
+    }
+
+    public function getPenalties(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'my_token' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return ['result' => 'failed', 'error' => $validator->errors()];
+        }
+        if (Users::checkAuth($request->input('my_token'))) {
+            $penalties = Penaltie::all();
+            return ['result' => 'success', 'penalties' => $penalties];
+        } else {
+            return ['result' => 'failed', 'penalties' => '', 'error' => 'you are un authorized user'];
+        }
+    }
+
+    public function deletePenaltie(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|integer|exists:penalties,id',
+            'my_token' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return ['result' => 'failed', 'error' => $validator->errors()];
+        }
+
+        if (Users::checkAuth($request->input('my_token'))) {
+            $penalty = Penaltie::find($request->id);
+            $penalty->delete();
+            return ['result' => 'success', 'message' => 'Penalty deleted successfully'];
+        } else {
+            return ['result' => 'failed', 'error' => 'you are un authorized user'];
+        }
     }
 }
