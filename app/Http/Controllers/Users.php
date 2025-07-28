@@ -15,6 +15,14 @@ use App\Models\StayRason;
 use App\Models\BookingSources;
 use App\Models\TaxName;
 use App\Models\Penaltie;
+use App\Models\BookingTaxe;
+use App\Models\Pricingplan;
+use App\Models\RoomtypePricingplan;
+use App\Models\User;
+use App\Models\UserPermission;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+
 
 class Users extends Controller
 {
@@ -778,7 +786,6 @@ class Users extends Controller
         }
     }
 
-
     public function addPenaltie(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -843,5 +850,298 @@ class Users extends Controller
         } else {
             return ['result' => 'failed', 'error' => 'you are un authorized user'];
         }
+    }
+
+    public function createUserReception(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'firstname' => 'required|string|max:100',
+            'lastname' => 'required|string|max:100',
+            'jobNumber' => 'required|integer|unique:users,jobNumber',
+            'password' => 'required|string|min:6',
+            'mobile' => 'required|string|unique:users,mobile',
+        ]);
+
+        if ($validator->fails()) {
+            return ['result' => 'failed', 'error' => $validator->errors()];
+        }
+
+        $user = new User();
+        $user->firstname = $request->firstname;
+        $user->lastname = $request->lastname;
+        $user->jobNumber = $request->jobNumber;
+        $user->password   = password_hash($request->password, PASSWORD_DEFAULT);
+        $user->mobile = $request->mobile;
+        $user->mytoken = Users::makeToken();
+        $user->active = 0;
+        $user->save();
+        return ['result' => 'success', 'user' => $user];
+    }
+
+    public function updateUserinfo(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:users,id',
+            'mobile' => 'required|numeric|unique:users,mobile,' . $request->id,
+        ]);
+        $user = User::find($request->id);
+        if (!$user) {
+            return ['result' => 'failed', 'error' => 'User not found'];
+        }
+        $user->mobile = $request->mobile;
+        $user->save();
+        return ['result' => 'success', 'user' => 'updated successfully'];
+    }
+
+    public function deleteUserReception(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|exists:users,id',
+        ]);
+
+        if ($validator->fails()) {
+            return ['result' => 'failed', 'error' => $validator->errors()];
+        }
+
+        $user = User::find($request->id);
+        $user->active = 1;
+        $user->save();
+        return ['result' => 'success', 'message' => 'delete successfully'];
+    }
+
+    public function updateUserPasswordReception(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|exists:users,id',
+            'old_password' => 'required|string',
+            'new_password' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return ['result' => 'failed', 'error' => $validator->errors()];
+        }
+
+        $user = User::find($request->id);
+
+        if (!Hash::check($request->old_password, $user->password)) {
+            return ['result' => 'failed', 'message' => 'Current password is incorrect'];
+        }
+
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
+        return ['result' => 'success', 'message' => 'Password updated successfully'];
+    }
+
+    public function addPermissionUser(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'permission_id' => 'required|array',
+            'user_id' => 'required|exists:users,id',
+        ]);
+        if ($validator->fails()) {
+            return ['result' => 'failed', 'error' => $validator->errors()];
+        }
+        DB::beginTransaction();
+        try {
+            UserPermission::where('UserId', $request->user_id)->delete();
+            $data = [];
+            foreach ($request->permission_id as $permID) {
+                $data[] = [
+                    'UserId' => $request->user_id,
+                    'PermissionId' => $permID,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+            UserPermission::insert($data);
+            DB::commit();
+            return ['result' => 'success', 'error' => ''];
+        } catch (Exception $e) {
+            DB::rollBack();
+            return ['result' => 'error', 'error' => 'Something went wrong. Please try again.'];
+        }
+    }
+
+    public function addBookingTax(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'booking_id' => 'required|exists:bookings,id',
+            'tax_id' => 'required|exists:taxnames,id',
+        ]);
+
+        if ($validator->fails()) {
+            return ['result' => 'failed', 'error' => $validator->errors()];
+        }
+
+        try {
+            BookingTaxe::create([
+                'BookingId' => $request->booking_id,
+                'TaxId' => $request->tax_id,
+            ]);
+            return ['result' => 'success', 'error' => ''];
+        } catch (Exception $e) {
+            return ['result' => 'error', 'error' => 'Something went wrong. Please try again.'];
+        }
+    }
+
+    public function addPricingPlan(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'NameAr' => 'required|string|max:255',
+            'NameEn' => 'required|string|max:255',
+            'StartDate' => 'required|date',
+            'EndDate' => 'required|date|after_or_equal:StartDate',
+        ]);
+
+        if ($validator->fails()) {
+            return ['result' => 'failed', 'error' => $validator->errors()];
+        }
+
+        try {
+            Pricingplan::create([
+                'NameAr' => $request->NameAr,
+                'NameEn' => $request->NameEn,
+                'StartDate' => $request->StartDate,
+                'EndDate' => $request->EndDate,
+            ]);
+
+            return ['result' => 'success', 'error' => ''];
+        } catch (Exception $e) {
+            return ['result' => 'error', 'error' => 'Something went wrong. Please try again.' . $e];
+        }
+    }
+
+    public function getAllPricingplans()
+    {
+        $plans = Pricingplan::all();
+        return ['result' => 'success', 'data' => $plans];
+    }
+
+    public function getPricingplansByDate(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'StartDate' => 'required|date',
+            'EndDate' => 'required|date|after_or_equal:StartDate',
+        ]);
+
+        if ($validator->fails()) {
+            return ['result' => 'failed', 'error' => $validator->errors()];
+        }
+
+        try {
+            $plans = Pricingplan::where('StartDate', '>=', $request->StartDate)
+                ->where('EndDate', '<=', $request->EndDate)
+                ->get();
+
+            return ['result' => 'success', 'data' => $plans];
+        } catch (Exception $e) {
+            return ['result' => 'error', 'error' => 'Something went wrong. Please try again.'];
+        }
+    }
+
+    public function updatePricingplan(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|exists:pricingplans,id',
+            'NameAr' => 'sometimes|string|max:255',
+            'NameEn' => 'sometimes|string|max:255',
+            'StartDate' => 'sometimes|date',
+            'EndDate' => 'sometimes|date',
+        ]);
+
+        if ($validator->fails()) {
+            return ['result' => 'failed', 'error' => $validator->errors()];
+        }
+
+        try {
+            $plan = Pricingplan::find($request->id);
+            if (!$plan) {
+                return ['result' => 'error', 'error' => 'Pricing plan not found'];
+            }
+
+            if ($request->has('NameAr')) $plan->NameAr = $request->NameAr;
+            if ($request->has('NameEn')) $plan->NameEn = $request->NameEn;
+            if ($request->has('StartDate')) $plan->StartDate = $request->StartDate;
+            if ($request->has('EndDate')) $plan->EndDate = $request->EndDate;
+
+            $plan->save();
+
+            return ['result' => 'success', 'error' => ''];
+        } catch (Exception $e) {
+            return ['result' => 'error', 'error' => 'Something went wrong. Please try again.'];
+        }
+    }
+
+    public function deletePricingplan(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|exists:pricingplans,id',
+        ]);
+
+        if ($validator->fails()) {
+            return ['result' => 'failed', 'error' => $validator->errors()];
+        }
+
+        try {
+            Pricingplan::where('id', $request->id)->delete();
+            return ['result' => 'success', 'error' => ''];
+        } catch (Exception $e) {
+            return ['result' => 'error', 'error' => 'Something went wrong. Please try again.'];
+        }
+    }
+
+    public function addRoomtypePricingplan(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'roomtype_id' => 'required|exists:roomtypes,id',
+            'pricingplan_id' => 'required|exists:pricingplans,id',
+            'DailyPrice' => 'required|numeric|min:0',
+            'MonthlyPrice' => 'required|numeric|min:0',
+            'YearlyPrice' => 'required|numeric|min:0',
+        ]);
+
+        if ($validator->fails()) {
+            return ['result' => 'failed', 'error' => $validator->errors()];
+        }
+
+        try {
+            RoomtypePricingplan::create([
+                'roomtype_id' => $request->roomtype_id,
+                'pricingplan_id' => $request->pricingplan_id,
+                'DailyPrice' => $request->DailyPrice,
+                'MonthlyPrice' => $request->MonthlyPrice,
+                'YearlyPrice' => $request->YearlyPrice,
+            ]);
+
+            return ['result' => 'success', 'error' => ''];
+        } catch (Exception $e) {
+            return ['result' => 'error', 'error' => 'Something went wrong. Please try again.' . $e];
+        }
+    }
+
+    public function getRoomtypePricingByDate(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'roomtype_id' => 'required|exists:roomtypes,id',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+        ]);
+
+        if ($validator->fails()) {
+            return ['result' => 'failed', 'error' => $validator->errors()];
+        }
+
+        $pricing = RoomtypePricingplan::where('roomtype_id', $request->roomtype_id)
+            ->whereHas('pricingplan', function ($query) use ($request) {
+                $query->where('StartDate', '<=', $request->start_date)
+                    ->where('EndDate', '>=', $request->end_date);
+            })->first();
+
+        if (!$pricing) {
+            return ['result' => 'not_found', 'error' => 'No active pricing plan found for this date.'];
+        }
+        // return ['result' => 'success', 'data' => $pricing];
+        return ['result' => 'success', 'data' => ['DailyPrice' => $pricing->DailyPrice, 'MonthlyPrice' => $pricing->MonthlyPrice, 'YearlyPrice' => $pricing->YearlyPrice, 'plan_name' => $pricing->pricingplan->NameEn]];
     }
 }

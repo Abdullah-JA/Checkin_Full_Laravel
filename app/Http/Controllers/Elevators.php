@@ -196,7 +196,6 @@ class Elevators extends Controller
     public function getElevatorFloors()
     {
         return ElevatorFloors::all();
-
     }
 
     public function testDelete()

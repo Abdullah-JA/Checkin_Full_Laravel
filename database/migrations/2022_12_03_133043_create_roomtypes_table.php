@@ -14,13 +14,16 @@ class CreateRoomtypesTable extends Migration
     public function up()
     {
         Schema::create('roomtypes', function (Blueprint $table) {
-          $table->increments('id');
-          $table->string('NameAr');
-          $table->string('NameEn');
-          $table->double("RentDay");
-          $table->double("RentMonth");
-          $table->double("RentYear");
-          $table->timestamps();
+            $table->increments('id');
+            $table->string('NameAr');
+            $table->string('NameEn');
+            $table->double("MaxDailyPrice");
+            $table->double("MinDailyPrice");
+            $table->double("MaxMonthlyPrice");
+            $table->double("MinMonthlyPrice");
+            $table->double("MaxYearlyPrice");
+            $table->double("MinYearlyPrice");
+            $table->timestamps();
         });
     }
 

@@ -19,7 +19,7 @@ class CreateUsersTable extends Migration
             $table->string('lastname', 100);
             $table->integer('jobNumber', false, true);
             $table->string('password');
-            $table->integer('mobile', false, true);
+            $table->string('mobile', 50);
             $table->string('mytoken');
             $table->tinyInteger('active')->default(0)->comment("0=>isActive 1=>Inactive");
             $table->timestamps();

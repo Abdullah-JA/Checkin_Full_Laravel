@@ -72,3 +72,21 @@ Route::post('/addPenaltie', [Users::class, 'addPenaltie']);
 Route::post('/getPenalties', [Users::class, 'getPenalties']);
 
 Route::post('/deletePenaltie', [Users::class, 'deletePenaltie']);
+
+Route::post('/createUserReception', [Users::class, 'createUserReception']);
+
+Route::post('/updateUserPasswordReception', [Users::class, 'updateUserPasswordReception']);
+
+Route::post('/addPermissionUser', [Users::class, 'addPermissionUser']);
+
+Route::post('/addPricingPlan', [Users::class, 'addPricingPlan']);
+
+Route::post('/getPricingplansByDate', [Users::class, 'getPricingplansByDate']);
+
+Route::post('/updatePricingplan', [Users::class, 'updatePricingplan']);
+
+Route::post('/deletePricingplan', [Users::class, 'deletePricingplan']);
+
+Route::post('/addRoomtypePricingplan', [Users::class, 'addRoomtypePricingplan']);
+
+Route::post('/getRoomtypePricingByDate', [Users::class, 'getRoomtypePricingByDate']);
